@@ -70,9 +70,17 @@ def delete_history_item(url):
         json.dump(new_history, f, ensure_ascii=False, indent=2)
 
 def get_best_thumbnail(meta):
+    # 優先從 yt-dlp 提取的 thumbnails 列表中找最高解析度的
+    thumbnails = meta.get("thumbnails", [])
+    if thumbnails:
+        # thumbnails 列表通常由低到高排序，取最後一個
+        return thumbnails[-1].get("url", "")
+    
+    # 備用方案：使用 YouTube 預設 URL
     video_id = meta.get("id")
     if not video_id: return ""
-    return f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
+    # hqdefault 幾乎所有影片都有，比 maxresdefault 穩定得多
+    return f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
 
 async def call_llm(text, meta, api_key):
     prompt = f"""
