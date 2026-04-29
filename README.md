@@ -23,7 +23,7 @@ A high-performance pipeline that transforms YouTube videos into high-quality, st
 ## 🛠️ Architecture / 技術架構
 
 1. **Extraction (提取)**: 使用 `yt-dlp` 獲取影片元數據與 `.vtt` 字幕文件。
-2. **Cleaning (清洗)**: 移除 WEBVTT 頭部、時間戳、HTML 標標以及重複的連續行。
+2. **Cleaning (清洗)**: 移除 WEBVTT 頭部、時間戳、HTML 標籤以及重複的連續行。
 3. **Synthesis (綜合重構)**: 透過專屬 Prompt 引導 Gemini 執行以下操作：
     - 將內容重新組織為 3-5 個核心主題。
     - 保留具體的案例、數據與金句。
