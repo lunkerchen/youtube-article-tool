@@ -8,7 +8,7 @@
 - **深度結構化**：非簡單的摘要，AI 會提取核心主題並以「主題塊」形式重新組織內容，保留具體案例與金句。
 - **多語系支持**：
   - **目標語系**：可指定文章輸出的語言（中文, 繁體中文, English, 日本語, 한국어 等）。
-  - **介面語系**：支持 繁體中文、English、日本語 三種 UI 介面切換。
+  - **介面語系**：支持 繁體中文、English、日本語、簡體中文 四種 UI 介面切換。
 - **歷史紀錄管理**：本地保存最近的轉換紀錄，支持快速回顧與刪除。
 - **Markdown 導出**：一鍵複製或下載生成的 Markdown 檔案，完美適配 Obsidian 等知識管理工具。
 
@@ -39,6 +39,17 @@ bash start.sh
 3. 貼上一個或多個 **YouTube 連結** (每行一個)。
 4. 點擊「立即啟動並行轉換」。
 
+### 📝 更新日誌 (Patch Notes)
+
+- **v3.1**
+  - 新增簡體中文 UI 介面支持。
+  - 優化複製 Markdown 的用戶體驗，由錯誤提示窗改為非侵入式 Toast 通知。
+  - 重構專案目錄結構，將邏輯與資源分離，提升可維護性。
+  - 修正圖片載入失敗時的 fallback 機制，消除控制台 404 錯誤。
+  - 修復 `changeUILanguage` 函數的語法錯誤。
+
+---
+
 ## 🛠️ 技術棧
 
 - **Backend**: FastAPI (Python) + asyncio
@@ -48,10 +59,10 @@ bash start.sh
 
 ## 📄 檔案結構
 
-- `main.py`: 後端核心邏輯，處理字幕提取與 AI 提示詞工程。
-- `templates/index.html`: 前端單頁應用 (SPA)，處理 UI 互動與 i18n。
+- `app/main.py`: 後端核心邏輯，處理字幕提取與 AI 提示詞工程。
+- `app/templates/index.html`: 前端單頁應用 (SPA)，處理 UI 互動與 i18n。
 - `start.sh`: 快速啟動伺服器的腳本。
-- `history.json`: 本地歷史紀錄儲存檔。
+- `data/history.json`: 本地歷史紀錄儲存檔。
 
 ## ⚠️ 注意事項
 - **API Key**: 本工具不會在伺服器端儲存你的 API Key，僅在前端 localStorage 暫存以便使用。
