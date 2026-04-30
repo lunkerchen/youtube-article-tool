@@ -82,18 +82,18 @@ def get_best_thumbnail(meta):
     # hqdefault 幾乎所有影片都有，比 maxresdefault 穩定得多
     return f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
 
-async def call_llm(text, meta, api_key):
+async def call_llm(text, meta, api_key, target_lang="中文"):
     prompt = f"""
     角色：你是一位頂尖的科技記者與知識策展人，擅長將口語化的訪談/分享轉化為深度結構化文章。
     輸入：
     1. 影片元數據：{json.dumps(meta, ensure_ascii=False)}
     2. 清洗後字幕：{text}
-    任務：請將上述內容改寫為高品質的中文文章。
+    任務：請將上述內容改寫為高品質的{target_lang}文章。
     寫作準則：
     1. 邏輯重構：不要按時間順序記錄，請根據內容提取出 3-5 個核心主題，以「主題塊」形式組織文章。
     2. 保留精髓：完整保留影片中的具體案例、數據、金句和故事，不要過度簡化。
     3. 補全上下文：針對影片中對聽眾默認已知但文章讀者可能陌生的背景，請適度補充解釋。
-    4. 語調轉換：將口語轉換為專業、流暢的書面中文，但保持原作者的觀點色彩。
+    4. 語調轉換：將口語轉換為專業、流暢的書面{target_lang}，但保持原作者的觀點色彩。
     5. 格式要求：使用 Markdown 格式，包含清晰的標題、副標題、重點加粗以及原影片信息區塊。
     注意：絕對禁止使用 LaTeX 符號 (例如 $\rightarrow$)，請使用 '->' 代替。
     """
@@ -126,7 +126,7 @@ async def delete_history(url: str):
     except Exception as e:
         return {"error": str(e)}
 
-async def process_single_video(url, api_key):
+async def process_single_video(url, api_key, target_lang="中文"):
     try:
         meta_file = os.path.join(TEMP_DIR, f"meta_{os.urandom(4).hex()}.json")
         subprocess.run(["yt-dlp", "--dump-json", "--skip-download", url], 
@@ -168,7 +168,7 @@ async def process_single_video(url, api_key):
         best_vtt_path = best_vtt_path or vtt_files[0]
         text = clean_vtt(best_vtt_path)
 
-        article = await call_llm(text, meta, api_key)
+        article = await call_llm(text, meta, api_key, target_lang)
         save_history({
             "url": url,
             "title": meta.get("title", "未知標題"),
@@ -184,7 +184,7 @@ async def process_single_video(url, api_key):
         return {"url": url, "error": str(e)}
 
 @app.post("/convert")
-async def convert_videos(urls: str = Form(...), api_key: Optional[str] = Form(None)):
+async def convert_videos(urls: str = Form(...), api_key: Optional[str] = Form(None), target_lang: Optional[str] = Form("中文")):
     url_list = [u.strip() for u in urls.split('\n') if u.strip()]
     if not url_list: return {"error": "請輸入至少一個有效的 YouTube 連結"}
     
@@ -192,12 +192,12 @@ async def convert_videos(urls: str = Form(...), api_key: Optional[str] = Form(No
     effective_api_key = api_key or LLM_API_KEY
     if not effective_api_key or effective_api_key == "YOUR_GEMINI_API_KEY_HERE":
         return {"error": "請提供有效的 Gemini API Key"}
-
+    
     youtube_regex = r'^(https?://)?(www\.)?(youtube\.com|youtu\.be)/.+'
     valid_urls = [u for u in url_list if re.match(youtube_regex, u)]
     if not valid_urls: return {"error": "所有輸入的連結格式均不正確"}
-
-    # 建立任務，並將 API Key 傳遞給 call_llm
-    tasks = [process_single_video(url, effective_api_key) for url in valid_urls]
+    
+    # 建立任務，並將 API Key 與目標語系傳遞給 process_single_video
+    tasks = [process_single_video(url, effective_api_key, target_lang) for url in valid_urls]
     results = await asyncio.gather(*tasks)
     return {"results": results}

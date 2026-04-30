@@ -67,7 +67,18 @@
     </style>
 </head>
 <body class="bg-[#0f172a] text-slate-200 min-h-screen font-sans selection:bg-blue-500/30">
-    <div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="max-w-4xl mx-auto px-4 py-12 relative">
+        <div class="absolute top-12 right-4 z-50">
+            <div class="flex flex-col gap-1">
+                <label class="text-[10px] font-medium text-slate-500 text-right block mr-1">UI Language</label>
+                <select id="uiLangSelect" onchange="changeUILanguage()" 
+                        class="bg-[#1e293b] border border-slate-600 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
+                    <option value="zh-TW" selected>繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                </select>
+            </div>
+        </div>
         <header class="text-center mb-12">
             <h1 class="text-6xl font-extrabold text-white mb-4 tracking-tight">YouTube <span class="text-blue-500">轉文章</span></h1>
             <p class="text-slate-400 text-lg mb-8">高效並行轉換 -> 結構化深度知識庫</p>
@@ -79,6 +90,21 @@
                     <label class="text-xs font-medium text-slate-400 ml-1">Gemini API Key</label>
                     <input id="apiKeyInput" type="password" placeholder="輸入你的 Gemini API Key..." 
                            class="w-full bg-[#0f172a] border border-slate-600 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs font-medium text-slate-400 ml-1">文章輸出語系</label>
+                        <select id="targetLangSelect" 
+                                class="bg-[#0f172a] border border-slate-600 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
+                            <option value="中文">中文 (預設)</option>
+                            <option value="繁體中文">繁體中文</option>
+                            <option value="English">English</option>
+                            <option value="日本語">日本語</option>
+                            <option value="한국어">한국어</option>
+                            <option value="Español">Español</option>
+                            <option value="Français">Français</option>
+                        </select>
+                    </div>
                 </div>
                 <textarea id="urlInput" placeholder="貼上 YouTube 連結 (每行一個，支持多影片並行轉換...)" 
                           class="w-full h-32 bg-[#0f172a] border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"></textarea>
@@ -136,10 +162,125 @@
             </div>
         </div>
     </div>
-
     <script>
+        const i18n = {
+            'zh-TW': {
+                title: 'YouTube 轉文章工具 v3.1',
+                subtitle: '高效並行轉換 -> 結構化深度知識庫',
+                apiLabel: 'Gemini API Key',
+                apiPlaceholder: '輸入你的 Gemini API Key...',
+                uiLangLabel: '介面語言',
+                targetLangLabel: '輸出文章目標語言',
+                urlPlaceholder: '貼上 YouTube 連結 (每行一個，支持多影片並行轉換...)',
+                convertBtn: '立即啟動並行轉換',
+                errorTitle: '發生錯誤或部分轉換失敗',
+                loadingSteps: ["🔍 初始化並行隊列...", "📥 批量提取字幕...", "🧹 並行清洗數據...", "🤖 AI 深度重構文章..."],
+                resultMsg: '文章已生成',
+                downloadBtn: '下載 MD 檔',
+                copyBtn: '複製 Markdown',
+                historyTitle: '📜 最近轉換紀錄',
+                noHistory: '尚無紀錄',
+                confirmDelete: '確定要刪除這條紀錄嗎？',
+                deleteFail: '刪除失敗',
+                copySuccess: 'Markdown 已複製到剪貼簿！',
+                requestFail: '請求失敗: '
+            },
+            'en': {
+                title: 'YouTube to Article v3.1',
+                subtitle: 'High-efficiency Parallel Conversion -> Structured Knowledge Base',
+                apiLabel: 'Gemini API Key',
+                apiPlaceholder: 'Enter your Gemini API Key...',
+                uiLangLabel: 'UI Language',
+                targetLangLabel: 'Target Article Language',
+                urlPlaceholder: 'Paste YouTube links (one per line, supports parallel conversion...)',
+                convertBtn: 'Start Parallel Conversion',
+                errorTitle: 'Errors occurred or partial failure',
+                loadingSteps: ["🔍 Initializing parallel queue...", "📥 Batch extracting subtitles...", "🧹 Parallel data cleaning...", "🤖 AI deep restructuring..."],
+                resultMsg: 'Article generated',
+                downloadBtn: 'Download MD',
+                copyBtn: 'Copy Markdown',
+                historyTitle: '📜 Recent Conversions',
+                noHistory: 'No records found',
+                confirmDelete: 'Are you sure you want to delete this record?',
+                deleteFail: 'Delete failed',
+                copySuccess: 'Markdown copied to clipboard!',
+                requestFail: 'Request failed: '
+            },
+            'ja': {
+                title: 'YouTube 記事変換ツール v3.1',
+                subtitle: '高効率並列変換 -> 構造化ナレッジベース',
+                apiLabel: 'Gemini API Key',
+                apiPlaceholder: 'Gemini API Keyを入力してください...',
+                uiLangLabel: 'UI言語',
+                targetLangLabel: '出力記事の目標言語',
+                urlPlaceholder: 'YouTubeリンクを貼り付けてください (1行に1つ、並列変換に対応...)',
+                convertBtn: '並列変換を開始',
+                errorTitle: 'エラーが発生しました、または一部変換に失敗しました',
+                loadingSteps: ["🔍 並列キューを初期化中...", "📥 字幕を一括抽出中...", "🧹 データを並列クレンジング中...", "🤖 AIが記事を深く再構成中..."],
+                resultMsg: '記事が生成されました',
+                downloadBtn: 'MDファイルをダウンロード',
+                copyBtn: 'Markdownをコピー',
+                historyTitle: '📜 最近の変換履歴',
+                noHistory: '履歴はありません',
+                confirmDelete: 'この記録を削除してもよろしいですか？',
+                deleteFail: '削除に失敗しました',
+                copySuccess: 'Markdownをクリップボードにコピーしました！',
+                requestFail: 'リクエストに失敗しました: '
+            }
+        };
+
         let currentArticle = "";
         let currentTitle = "";
+
+        function changeUILanguage() {
+            const lang = document.getElementById('uiLangSelect').value;
+            const t = i18n[lang];
+            
+            document.title = t.title;
+            const headerH1 = document.querySelector('header h1');
+            if (headerH1) {
+                headerH1.innerHTML = lang === 'zh-TW' ? `YouTube <span class="text-blue-500">轉文章</span>` : `YouTube <span class="text-blue-500">to Article</span>`;
+            }
+            const headerP = document.querySelector('header p');
+            if (headerP) headerP.innerText = t.subtitle;
+            
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            if (apiKeyInput) apiKeyInput.placeholder = t.apiPlaceholder;
+            
+            // 為了絕對穩定，改用 ID 或更明確的選擇器，不再依賴 label 索引
+            const allLabels = document.querySelectorAll('label');
+            allLabels.forEach(label => {
+                const text = label.innerText;
+                if (text === 'UI Language' || text === '介面語言') {
+                    label.innerText = lang === 'zh-TW' ? '介面語言' : 'UI Language';
+                } else if (text === t.apiLabel || text === 'Gemini API Key') {
+                    label.innerText = t.apiLabel;
+                } else if (text === t.targetLangLabel || text === '文章輸出語系') {
+                    label.innerText = t.targetLangLabel;
+                }
+            });
+
+            const urlInput = document.getElementById('urlInput');
+            if (urlInput) urlInput.placeholder = t.urlPlaceholder;
+            
+            const convertBtn = document.getElementById('convertBtn');
+            if (convertBtn) convertBtn.innerText = t.convertBtn;
+            
+            const errorSpan = document.querySelector('#errorDisplay .flex.items-center.gap-2.font-bold.mb-1 span');
+            if (errorSpan) errorSpan.innerText = t.errorTitle;
+            
+            const resultSpan = document.querySelector('#resultContainer .flex.justify-between.items-center span');
+            if (resultSpan) resultSpan.innerText = t.resultMsg;
+            
+            const dlBtn = document.querySelector('button[onclick="downloadMarkdown()"]');
+            if (dlBtn) dlBtn.innerText = t.downloadBtn;
+            
+            const cpBtn = document.querySelector('button[onclick="copyMarkdown()"]');
+            if (cpBtn) cpBtn.innerText = t.copyBtn;
+            
+            const historySpan = document.querySelector('#historySection h2 span');
+            if (historySpan) historySpan.innerText = t.historyTitle;
+        }
 
         function showError(messages) {
             const display = document.getElementById('errorDisplay');
@@ -172,10 +313,11 @@
                     div.onclick = () => showArticle(item.article, item.title);
                     div.innerHTML = `
                         <div class="w-24 h-14 flex-shrink-0 overflow-hidden rounded-lg bg-slate-800 relative">
-                            <img src="${item.thumbnail || 'https://via.placeholder.com/96x56?text=No+Image'}" 
-                                 referrerpolicy="no-referrer"
-                                 class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
-                                 onerror="this.src='https://via.placeholder.com/96x56?text=No+Image'">
+                                <img src="${item.thumbnail || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'}" 
+                                     referrerpolicy="no-referrer"
+                                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                                <div class="absolute inset-0 flex items-center justify-center bg-slate-700 text-[10px] text-slate-400" style="display:none">No Image</div>
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="text-white font-medium mb-1 truncate group-hover:text-blue-400 transition-all overflow-hidden whitespace-nowrap text-ellipsis">${item.title}</div>
@@ -236,16 +378,22 @@
         async function convert() {
             const urlInput = document.getElementById('urlInput');
             const apiKeyInput = document.getElementById('apiKeyInput');
+            const targetLangSelect = document.getElementById('targetLangSelect');
             const urls = urlInput.value.split('\\n').filter(u => u.trim());
             const apiKey = apiKeyInput.value.trim();
+            const targetLang = targetLangSelect.value;
+            
+            const lang = document.getElementById('uiLangSelect').value;
+            const t = i18n[lang];
+
             hideError();
             if (!apiKey) {
-                showError(['請先輸入 Gemini API Key']);
+                showError([t.apiPlaceholder]); // Use translation for missing key error
                 return;
             }
             localStorage.setItem('gemini_api_key', apiKey);
             if (urls.length === 0) {
-                showError(['請輸入至少一個 YouTube 連結']);
+                showError([t.urlPlaceholder]); 
                 return;
             }
             const btn = document.getElementById('convertBtn');
@@ -258,7 +406,7 @@
             loading.classList.remove('hidden');
             resultContainer.classList.add('hidden');
             let progress = 0;
-            const steps = ["🔍 初始化並行隊列...", "📥 批量提取字幕...", "🧹 並行清洗數據...", "🤖 AI 深度重構文章..."];
+            const steps = t.loadingSteps;
             let stepIdx = 0;
             const progressInterval = setInterval(() => {
                 if (progress < 30) progress += Math.random() * 5;
@@ -276,6 +424,7 @@
                 const formData = new FormData();
                 formData.append('urls', urlInput.value);
                 formData.append('api_key', apiKey);
+                formData.append('target_lang', targetLang);
                 const response = await fetch('/convert', { method: 'POST', body: formData });
                 const data = await response.json();
                 if (data.error) {
@@ -306,7 +455,7 @@
                     }, 500);
                 }
             } catch (e) {
-                showError(['請求失敗: ' + e]);
+                showError([t.requestFail + e]);
             } finally {
                 clearInterval(progressInterval);
                 setTimeout(() => {
