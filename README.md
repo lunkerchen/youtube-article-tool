@@ -10,8 +10,8 @@ A high-performance pipeline that transforms YouTube videos into high-quality, st
 
 ## 🌟 Features / 功能特性
 
-- **Multi-Stage Pipeline / 多階段流水線**: `Extraction` (提取) $\rightarrow$ `Cleaning` (清洗) $\rightarrow$ `Synthesis` (綜合重構)。
-- **Smart Subtitle Matching / 智能字幕匹配**: 根據優先級清單（繁體中文 $\rightarrow$ 簡體中文 $\rightarrow$ 英文 $\rightarrow$ 日文 $\rightarrow$ 韓文）自動選擇最佳可用字幕。
+- **Multi-Stage Pipeline / 多階段流水線**: `Extraction` (提取) -> `Cleaning` (清洗) -> `Synthesis` (綜合重構)。
+- **Smart Subtitle Matching / 智能字幕匹配**: 根據優先級清單（繁體中文 -> 簡體中文 -> 英文 -> 日文 -> 韓文）自動選擇最佳可用字幕。
 - **Parallel Processing / 並行處理**: 使用 `asyncio` 同時處理多個 YouTube 連結。
 - **Structured Synthesis / 結構化重構**: 利用 Gemini 1.5 Flash 將口語化的逐字稿重組成「主題塊」結構（而非簡單的線性總結）。
 - **Flexible API Key Management / 靈活的金鑰管理**: 
@@ -28,7 +28,7 @@ A high-performance pipeline that transforms YouTube videos into high-quality, st
     - 將內容重新組織為 3-5 個核心主題。
     - 保留具體的案例、數據與金句。
     - 將口語風格轉換為專業的書面中文。
-    - 維持嚴格的視覺層級 (H1 $\rightarrow$ H2 $\rightarrow$ H3)。
+    - 維持嚴格的視覺層級 (H1 -> H2 -> H3)。
 
 ## 🚀 Getting Started / 快速上手
 
@@ -99,6 +99,9 @@ chmod +x start.sh
 
 ## 📜 Patch Notes / 更新日誌
 
+- **v3.2**
+    - 優化用戶通知系統：移除所有 `alert()` 彈窗，改為在網頁內直接顯示錯誤/通知訊息。
+    - 強化錯誤處理：支持並行轉換時詳細列出每一支失敗影片的具體原因（如：無可用字幕）。
 - **v3.1**
     - 修正部分影片封面無法顯示的問題，實作多層級解析度回退機制。
     - 新增網頁端 API Key 暫存功能 (`localStorage`)，避免重複填寫。

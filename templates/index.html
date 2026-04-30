@@ -89,6 +89,15 @@
             </div>
         </div>
 
+        <!-- 錯誤訊息顯示區域 -->
+        <div id="errorDisplay" class="hidden mb-8 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm space-y-2">
+            <div class="flex items-center gap-2 font-bold mb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12" y2="16"></line></svg>
+                <span>發生錯誤或部分轉換失敗</span>
+            </div>
+            <div id="errorMessages" class="space-y-1 opacity-90"></div>
+        </div>
+
         <div id="loading" class="hidden space-y-4 mb-12">
             <div class="flex justify-between items-center mb-2">
                 <p id="loadingText" class="text-slate-400 text-lg font-medium">正在初始化並行隊列...</p>
@@ -132,18 +141,31 @@
         let currentArticle = "";
         let currentTitle = "";
 
+        function showError(messages) {
+            const display = document.getElementById('errorDisplay');
+            const container = document.getElementById('errorMessages');
+            if (!messages || messages.length === 0) {
+                display.classList.add('hidden');
+                return;
+            }
+            container.innerHTML = messages.map(m => `<div>• ${m}</div>`).join('');
+            display.classList.remove('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('errorDisplay').classList.add('hidden');
+        }
+
         async function loadHistory() {
             try {
                 const res = await fetch('/history');
                 const data = await res.json();
                 const list = document.getElementById('historyList');
                 list.innerHTML = '';
-                
                 if (!data || !Array.isArray(data) || data.length === 0) {
                     list.innerHTML = '<p class="text-slate-500 text-center py-8 bg-[#1e293b] rounded-xl border border-slate-700">尚無紀錄</p>';
                     return;
                 }
-
                 data.forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'bg-[#1e293b] p-3 rounded-xl border border-slate-700 flex gap-4 items-center hover:border-blue-500 transition-all cursor-pointer group overflow-hidden';
@@ -167,7 +189,6 @@
                     `;
                     list.appendChild(div);
                 });
-
             } catch (e) {
                 console.error('Load history failed:', e);
             }
@@ -187,14 +208,15 @@
                 await fetch(`/history?url=${encodeURIComponent(url)}`, { method: 'DELETE' });
                 await loadHistory();
             } catch (e) {
-                alert('刪除失敗');
+                showError(['刪除失敗']);
             }
         }
 
         async function copyMarkdown() {
             if(!currentArticle) return;
             await navigator.clipboard.writeText(currentArticle);
-            alert('Markdown 已複製到剪貼簿！');
+            showError(['Markdown 已複製到剪貼簿！']);
+            setTimeout(hideError, 3000);
         }
 
         function downloadMarkdown() {
@@ -216,80 +238,75 @@
             const apiKeyInput = document.getElementById('apiKeyInput');
             const urls = urlInput.value.split('\\n').filter(u => u.trim());
             const apiKey = apiKeyInput.value.trim();
-            
+            hideError();
             if (!apiKey) {
-                alert('請先輸入 Gemini API Key');
+                showError(['請先輸入 Gemini API Key']);
                 return;
             }
             localStorage.setItem('gemini_api_key', apiKey);
             if (urls.length === 0) {
-                alert('請輸入至少一個 YouTube 連結');
+                showError(['請輸入至少一個 YouTube 連結']);
                 return;
             }
-
             const btn = document.getElementById('convertBtn');
             const loading = document.getElementById('loading');
             const resultContainer = document.getElementById('resultContainer');
             const loadingText = document.getElementById('loadingText');
             const progressBar = document.getElementById('progressBar');
             const progressPercent = document.getElementById('progressPercent');
-
             btn.disabled = true;
             loading.classList.remove('hidden');
             resultContainer.classList.add('hidden');
-
             let progress = 0;
             const steps = ["🔍 初始化並行隊列...", "📥 批量提取字幕...", "🧹 並行清洗數據...", "🤖 AI 深度重構文章..."];
             let stepIdx = 0;
-
             const progressInterval = setInterval(() => {
                 if (progress < 30) progress += Math.random() * 5;
                 else if (progress < 70) progress += Math.random() * 2;
                 else if (progress < 95) progress += Math.random() * 0.5;
-                
                 if (progress > 100) progress = 100;
                 progressBar.style.width = `${progress}%`;
                 progressPercent.innerText = `${Math.round(progress)}%`;
-                
                 if (progress > 25 && stepIdx === 0) stepIdx = 1;
                 if (progress > 50 && stepIdx === 1) stepIdx = 2;
                 if (progress > 80 && stepIdx === 2) stepIdx = 3;
                 loadingText.innerText = steps[stepIdx];
             }, 200);
-
             try {
                 const formData = new FormData();
                 formData.append('urls', urlInput.value);
                 formData.append('api_key', apiKey);
-
-                const response = await fetch('/convert', {
-                    method: 'POST',
-                    body: formData
-                });
+                const response = await fetch('/convert', { method: 'POST', body: formData });
                 const data = await response.json();
-
                 if (data.error) {
-                    alert('錯誤: ' + data.error);
+                    showError([data.error]);
                 } else {
                     progress = 100;
                     progressBar.style.width = '100%';
                     progressPercent.innerText = '100%';
-                    
                     setTimeout(async () => {
-                        const firstResult = data.results.find(r => !r.error) || data.results[0];
-                        if (firstResult && !firstResult.error) {
+                        const results = data.results;
+                        const successful = results.filter(r => !r.error);
+                        const failed = results.filter(r => r.error);
+                        if (successful.length === 0) {
+                            const errorMsgs = failed.map(f => `${f.url} : ${f.error}`);
+                            showError(errorMsgs);
+                        } else {
+                            const firstResult = successful[0];
                             currentArticle = firstResult.article;
                             const titleMatch = currentArticle.match(/^#\s+(.*)$/m);
                             currentTitle = titleMatch ? titleMatch[1] : "YouTube 轉文章";
                             showArticle(currentArticle, currentTitle);
-                        } else {
-                            alert('所有影片轉換均失敗');
+                            if (failed.length > 0) {
+                                const errorMsgs = failed.map(f => `${f.url} : ${f.error}`);
+                                showError(errorMsgs);
+                            }
                         }
                         await loadHistory();
                     }, 500);
                 }
             } catch (e) {
-                alert('請求失敗: ' + e);
+                showError(['請求失敗: ' + e]);
             } finally {
                 clearInterval(progressInterval);
                 setTimeout(() => {
