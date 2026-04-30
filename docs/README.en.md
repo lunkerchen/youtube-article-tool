@@ -54,12 +54,15 @@ Once started, open in your browser: `http://127.0.0.1:8080`
 
 ### 📝 Patch Notes
 
+- **v3.2**
+  - **UI/UX Refinement**: Reorganized layout and added a security disclaimer for API Key storage.
+  - **Smart URL Parsing**: Robust detection of links from messy input (supports commas, spaces, etc.).
+  - **Multi-Result Tabs**: Interactive tab switcher for batch conversion results.
+  - **Productivity**: Added `Ctrl/Cmd + Enter` shortcut and "Clear Input" button.
 - **v3.1**
   - Added support for Simplified Chinese UI.
-  - Improved "Copy Markdown" UX by replacing the error display with a non-intrusive Toast notification.
-  - Refactored project directory structure for better maintainability.
-  - Optimized thumbnail fallback mechanism to eliminate console 404 errors.
-  - Fixed syntax error in `changeUILanguage` function.
+  - Improved "Copy Markdown" UX with Toast notifications.
+  - Refactored project directory structure and optimized thumbnail fallback.
 
 ---
 

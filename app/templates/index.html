@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube 轉文章工具 v3.0</title>
+    <title>YouTube 轉文章工具 v3.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -64,13 +64,15 @@
             background: rgba(59, 130, 246, 0.1);
             border-radius: 0 0.75rem 0.75rem 0;
         }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-[#0f172a] text-slate-200 min-h-screen font-sans selection:bg-blue-500/30">
     <div class="max-w-4xl mx-auto px-4 py-12 relative">
         <div class="absolute top-12 right-4 z-50">
             <div class="flex flex-col gap-1">
-                <label class="text-[10px] font-medium text-slate-500 text-right block mr-1">UI Language</label>
+                <label id="uiLangLabel" class="text-[10px] font-medium text-slate-500 text-right block mr-1">介面語言</label>
                 <select id="uiLangSelect" onchange="changeUILanguage()" 
                         class="bg-[#1e293b] border border-slate-600 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
                     <option value="zh-TW" selected>繁體中文</option>
@@ -80,23 +82,33 @@
                 </select>
             </div>
         </div>
-        <header class="text-center mb-12">
-            <h1 class="text-6xl font-extrabold text-white mb-4 tracking-tight">YouTube <span class="text-blue-500">轉文章</span></h1>
-            <p class="text-slate-400 text-lg mb-8">高效並行轉換 -> 結構化深度知識庫</p>
+
+        <header class="text-center mb-16">
+            <h1 class="text-6xl font-extrabold text-white mb-6 tracking-tighter">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">YouTube</span> 轉文章
+            </h1>
+            <p class="text-slate-400 text-xl font-light tracking-wide">高效並行轉換 <span class="mx-2 text-slate-600">|</span> 結構化深度知識庫</p>
         </header>
 
-        <div class="bg-[#1e293b] p-6 rounded-2xl shadow-2xl mb-8 border border-slate-700">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col gap-1">
-                    <label class="text-xs font-medium text-slate-400 ml-1">Gemini API Key</label>
-                    <input id="apiKeyInput" type="password" placeholder="輸入你的 Gemini API Key..." 
-                           class="w-full bg-[#0f172a] border border-slate-600 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="flex flex-col gap-1">
-                        <label class="text-xs font-medium text-slate-400 ml-1">文章輸出語系</label>
+        <div class="space-y-6 mb-12">
+            <!-- 配置區塊 -->
+            <div class="bg-[#1e293b]/50 backdrop-blur-sm p-8 rounded-3xl border border-slate-700/50 shadow-xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center ml-1">
+                            <label class="text-sm font-semibold text-slate-300">Gemini API Key</label>
+                            <span class="text-[10px] text-slate-500 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                僅儲存於本機瀏覽器
+                            </span>
+                        </div>
+                        <input id="apiKeyInput" type="password" placeholder="輸入你的 Gemini API Key..." 
+                               class="w-full bg-[#0f172a] border border-slate-600 focus:border-blue-500 rounded-2xl px-5 py-3 text-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-600">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-slate-300 ml-1">文章輸出語系</label>
                         <select id="targetLangSelect" 
-                                class="bg-[#0f172a] border border-slate-600 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
+                                class="w-full bg-[#0f172a] border border-slate-600 focus:border-blue-500 rounded-2xl px-5 py-3 text-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer appearance-none">
                             <option value="中文">中文 (預設)</option>
                             <option value="繁體中文">繁體中文</option>
                             <option value="English">English</option>
@@ -107,12 +119,28 @@
                         </select>
                     </div>
                 </div>
-                <textarea id="urlInput" placeholder="貼上 YouTube 連結 (每行一個，支持多影片並行轉換...)" 
-                          class="w-full h-32 bg-[#0f172a] border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"></textarea>
-                <button id="convertBtn" onclick="convert()" 
-                        class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all active:scale-95 disabled:opacity-50 shadow-lg shadow-blue-900/20">
-                    立即啟動並行轉換
-                </button>
+
+                <!-- 輸入區塊 -->
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center ml-1">
+                        <div class="flex items-center gap-3">
+                            <label class="text-sm font-semibold text-slate-300">YouTube 影片連結</label>
+                            <span class="text-[10px] text-slate-500 italic">支援多行、逗號或空格分隔</span>
+                        </div>
+                        <button onclick="clearInput()" class="text-[10px] text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                            清除輸入
+                        </button>
+                    </div>
+                    <textarea id="urlInput" placeholder="貼上連結... (可同時貼入多個，系統會自動解析)" 
+                              class="w-full h-40 bg-[#0f172a] border border-slate-600 focus:border-blue-500 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all resize-none placeholder:text-slate-700 font-mono text-sm"></textarea>
+                    
+                    <button id="convertBtn" onclick="convert()" 
+                            class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-4 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-50 shadow-xl shadow-blue-900/20 flex items-center justify-center gap-2 group">
+                        <svg class="group-hover:rotate-12 transition-transform" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                        立即啟動並行轉換 <span class="text-xs font-normal opacity-50 ml-1">(Ctrl+Enter)</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -135,21 +163,25 @@
             </div>
         </div>
 
-        <div id="resultContainer" class="hidden space-y-6 mb-12">
-            <div class="flex justify-between items-center bg-[#1e293b] p-4 rounded-xl border border-slate-700">
-                <span class="text-slate-400 text-sm font-medium">文章已生成</span>
-                <div class="flex gap-2">
-                    <button onclick="downloadMarkdown()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        下載 MD 檔
+        <div id="resultContainer" class="hidden space-y-4 mb-12">
+            <!-- 結果控制列 -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#1e293b] p-3 rounded-2xl border border-slate-700 gap-4">
+                <div id="resultTabs" class="flex gap-2 overflow-x-auto pb-1 md:pb-0 w-full md:w-auto scrollbar-hide">
+                    <!-- 分頁標籤將由 JS 動態生成 -->
+                </div>
+                <div class="flex gap-2 w-full md:w-auto shrink-0 border-t md:border-t-0 border-slate-700 pt-3 md:pt-0">
+                    <button onclick="downloadMarkdown()" class="flex-1 md:flex-none bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        下載 MD
                     </button>
-                    <button onclick="copyMarkdown()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        複製 Markdown
+                    <button onclick="copyMarkdown()" class="flex-1 md:flex-none bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 px-4 py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 border border-blue-500/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        複製內容
                     </button>
                 </div>
             </div>
-            <div id="result" class="bg-[#1e293b] p-8 rounded-2xl shadow-xl border border-slate-700 prose max-w-none">
+            
+            <div id="result" class="bg-[#1e293b] p-8 md:p-12 rounded-3xl shadow-2xl border border-slate-700 prose max-w-none">
                 <!-- 文章內容將在此渲染 -->
             </div>
         </div>
@@ -163,22 +195,23 @@
             </div>
         </div>
     </div>
+
     <script>
         const i18n = {
             'zh-TW': {
                 title: 'YouTube 轉文章工具 v3.1',
-                subtitle: '高效並行轉換 -> 結構化深度知識庫',
+                subtitle: '高效並行轉換 | 結構化深度知識庫',
                 apiLabel: 'Gemini API Key',
                 apiPlaceholder: '輸入你的 Gemini API Key...',
                 uiLangLabel: '介面語言',
-                targetLangLabel: '輸出文章目標語言',
-                urlPlaceholder: '貼上 YouTube 連結 (每行一個，支持多影片並行轉換...)',
+                targetLangLabel: '文章輸出語系',
+                urlPlaceholder: '貼上連結... (可同時貼入多個，系統會自動解析)',
                 convertBtn: '立即啟動並行轉換',
                 errorTitle: '發生錯誤或部分轉換失敗',
                 loadingSteps: ["🔍 初始化並行隊列...", "📥 批量提取字幕...", "🧹 並行清洗數據...", "🤖 AI 深度重構文章..."],
                 resultMsg: '文章已生成',
-                downloadBtn: '下載 MD 檔',
-                copyBtn: '複製 Markdown',
+                downloadBtn: '下載 MD',
+                copyBtn: '複製內容',
                 historyTitle: '📜 最近轉換紀錄',
                 noHistory: '尚無紀錄',
                 confirmDelete: '確定要刪除這條紀錄嗎？',
@@ -188,18 +221,18 @@
             },
             'zh-CN': {
                 title: 'YouTube 转文章工具 v3.1',
-                subtitle: '高效并行转换 -> 结构化深度知识库',
+                subtitle: '高效并行转换 | 结构化深度知识库',
                 apiLabel: 'Gemini API Key',
                 apiPlaceholder: '输入你的 Gemini API Key...',
                 uiLangLabel: '界面语言',
-                targetLangLabel: '输出文章目标语言',
-                urlPlaceholder: '粘贴 YouTube 链接 (每行一个，支持多视频并行转换...)',
+                targetLangLabel: '文章输出语系',
+                urlPlaceholder: '粘贴链接... (可同时貼入多个，系统会自动解析)',
                 convertBtn: '立即启动并行转换',
                 errorTitle: '发生错误或部分转换失败',
                 loadingSteps: ["🔍 初始化并行队列...", "📥 批量提取字幕...", "🧹 并行清洗数据...", "🤖 AI 深度重构文章..."],
                 resultMsg: '文章已生成',
-                downloadBtn: '下载 MD 文件',
-                copyBtn: '复制 Markdown',
+                downloadBtn: '下载 MD',
+                copyBtn: '复制内容',
                 historyTitle: '📜 最近转换记录',
                 noHistory: '尚无记录',
                 confirmDelete: '确定要删除这条记录吗？',
@@ -209,18 +242,18 @@
             },
             'en': {
                 title: 'YouTube to Article v3.1',
-                subtitle: 'High-efficiency Parallel Conversion -> Structured Knowledge Base',
+                subtitle: 'High-efficiency Parallel Conversion | Structured Knowledge Base',
                 apiLabel: 'Gemini API Key',
                 apiPlaceholder: 'Enter your Gemini API Key...',
                 uiLangLabel: 'UI Language',
                 targetLangLabel: 'Target Article Language',
-                urlPlaceholder: 'Paste YouTube links (one per line, supports parallel conversion...)',
+                urlPlaceholder: 'Paste links... (multiple supported, auto-parsing)',
                 convertBtn: 'Start Parallel Conversion',
                 errorTitle: 'Errors occurred or partial failure',
                 loadingSteps: ["🔍 Initializing parallel queue...", "📥 Batch extracting subtitles...", "🧹 Parallel data cleaning...", "🤖 AI deep restructuring..."],
                 resultMsg: 'Article generated',
                 downloadBtn: 'Download MD',
-                copyBtn: 'Copy Markdown',
+                copyBtn: 'Copy Content',
                 historyTitle: '📜 Recent Conversions',
                 noHistory: 'No records found',
                 confirmDelete: 'Are you sure you want to delete this record?',
@@ -230,19 +263,19 @@
             },
             'ja': {
                 title: 'YouTube 記事変換ツール v3.1',
-                subtitle: '高効率並列変換 -> 構造化ナレッジベース',
+                subtitle: '高効率並列変換 | 構造化ナレッジベース',
                 apiLabel: 'Gemini API Key',
                 apiPlaceholder: 'Gemini API Keyを入力してください...',
                 uiLangLabel: 'UI言語',
                 targetLangLabel: '出力記事の目標言語',
-                urlPlaceholder: 'YouTubeリンクを貼り付けてください (1行に1つ、並列変換に対応...)',
+                urlPlaceholder: 'リンクを貼り付けてください (複数対応、自動解析)',
                 convertBtn: '並列変換を開始',
-                errorTitle: 'エラーが発生しました、または一部変換に失敗しました',
+                errorTitle: 'エラーが発生しました、または一部轉換に失敗しました',
                 loadingSteps: ["🔍 並列キューを初期化中...", "📥 字幕を一括抽出中...", "🧹 データを並列クレンジング中...", "🤖 AIが記事を深く再構成中..."],
                 resultMsg: '記事が生成されました',
-                downloadBtn: 'MDファイルをダウンロード',
-                copyBtn: 'Markdownをコピー',
-                historyTitle: '📜 最近の変換履歴',
+                downloadBtn: 'MD',
+                copyBtn: 'コピー',
+                historyTitle: '📜 最近の轉換履歴',
                 noHistory: '履歴はありません',
                 confirmDelete: 'この記録を削除してもよろしいですか？',
                 deleteFail: '削除に失敗しました',
@@ -251,8 +284,72 @@
             }
         };
 
+        const uiStrings = {
+            clearConfirm: '確定要清除輸入嗎？',
+            parseError: '找不到有效的 YouTube 連結',
+            successBatch: '批次轉換完成！'
+        };
+
         let currentArticle = "";
         let currentTitle = "";
+        let conversionResults = [];
+
+        function clearInput() {
+            const input = document.getElementById('urlInput');
+            if (input.value && confirm(uiStrings.clearConfirm)) {
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function switchResult(index) {
+            const result = conversionResults[index];
+            if (!result) return;
+            
+            showArticle(result.article, result.title);
+            
+            const tabs = document.querySelectorAll('.result-tab');
+            tabs.forEach((tab, i) => {
+                if (i === index) {
+                    tab.classList.remove('bg-slate-800', 'text-slate-400');
+                    tab.classList.add('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-900/40');
+                } else {
+                    tab.classList.add('bg-slate-800', 'text-slate-400');
+                    tab.classList.remove('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-900/40');
+                }
+            });
+        }
+
+        function renderTabs(results) {
+            const container = document.getElementById('resultTabs');
+            container.innerHTML = '';
+            
+            results.forEach((res, i) => {
+                const btn = document.createElement('button');
+                btn.className = `result-tab flex-shrink-0 px-4 py-2 rounded-xl text-xs font-medium transition-all ${i === 0 ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`;
+                const shortTitle = res.title.length > 12 ? res.title.substring(0, 12) + '...' : res.title;
+                btn.innerText = `📄 ${shortTitle}`;
+                btn.onclick = () => switchResult(i);
+                container.appendChild(btn);
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                const btn = document.getElementById('convertBtn');
+                if (!btn.disabled) convert();
+            }
+        });
+
+        function parseUrls(text) {
+            const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/g;
+            const matches = [];
+            let match;
+            while ((match = youtubeRegex.exec(text)) !== null) {
+                matches.push(`https://www.youtube.com/watch?v=${match[1]}`);
+            }
+            return [...new Set(matches)];
+        }
 
         function changeUILanguage() {
             const lang = document.getElementById('uiLangSelect').value;
@@ -261,44 +358,28 @@
             document.title = t.title;
             const headerH1 = document.querySelector('header h1');
             if (headerH1) {
-                headerH1.innerHTML = lang === 'zh-TW' ? `YouTube <span class="text-blue-500">轉文章</span>` : `YouTube <span class="text-blue-500">to Article</span>`;
+                headerH1.innerHTML = lang === 'zh-TW' || lang === 'zh-CN' ? 
+                    `<span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">YouTube</span> ${lang === 'zh-TW' ? '轉文章' : '转文章'}` : 
+                    `<span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">YouTube</span> to Article`;
             }
-            const headerP = document.querySelector('header p');
-            if (headerP) headerP.innerText = t.subtitle;
+            document.querySelector('header p').innerText = t.subtitle;
+            document.getElementById('apiKeyInput').placeholder = t.apiPlaceholder;
+            document.getElementById('uiLangLabel').innerText = t.uiLangLabel;
             
-            const apiKeyInput = document.getElementById('apiKeyInput');
-            if (apiKeyInput) apiKeyInput.placeholder = t.apiPlaceholder;
-            
-            // 為了絕對穩定，改用 ID 或更明確的選擇器，不再依賴 label 索引
-            const allLabels = document.querySelectorAll('label');
-            allLabels.forEach(label => {
-                const text = label.innerText;
-                if (text === 'UI Language' || text === '介面語言') {
-                    label.innerText = lang === 'zh-TW' ? '介面語言' : 'UI Language';
-                } else if (text === t.apiLabel || text === 'Gemini API Key') {
-                    label.innerText = t.apiLabel;
-                } else if (text === t.targetLangLabel || text === '文章輸出語系') {
-                    label.innerText = t.targetLangLabel;
-                }
-            });
-
             const urlInput = document.getElementById('urlInput');
             if (urlInput) urlInput.placeholder = t.urlPlaceholder;
             
             const convertBtn = document.getElementById('convertBtn');
-            if (convertBtn) convertBtn.innerText = t.convertBtn;
+            if (convertBtn) convertBtn.innerHTML = `<svg class="group-hover:rotate-12 transition-transform" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> ${t.convertBtn} <span class="text-xs font-normal opacity-50 ml-1">(Ctrl+Enter)</span>`;
             
             const errorSpan = document.querySelector('#errorDisplay .flex.items-center.gap-2.font-bold.mb-1 span');
             if (errorSpan) errorSpan.innerText = t.errorTitle;
             
-            const resultSpan = document.querySelector('#resultContainer .flex.justify-between.items-center span');
-            if (resultSpan) resultSpan.innerText = t.resultMsg;
-            
             const dlBtn = document.querySelector('button[onclick="downloadMarkdown()"]');
-            if (dlBtn) dlBtn.innerText = t.downloadBtn;
+            if (dlBtn) dlBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> ${t.downloadBtn}`;
             
             const cpBtn = document.querySelector('button[onclick="copyMarkdown()"]');
-            if (cpBtn) cpBtn.innerText = t.copyBtn;
+            if (cpBtn) cpBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> ${t.copyBtn}`;
             
             const historySpan = document.querySelector('#historySection h2 span');
             if (historySpan) historySpan.innerText = t.historyTitle;
@@ -392,7 +473,8 @@
         async function copyMarkdown() {
             if(!currentArticle) return;
             await navigator.clipboard.writeText(currentArticle);
-            showToast(i18n[document.getElementById('uiLangSelect').value].copySuccess);
+            const lang = document.getElementById('uiLangSelect').value;
+            showToast(i18n[lang].copySuccess);
         }
 
         function downloadMarkdown() {
@@ -413,7 +495,8 @@
             const urlInput = document.getElementById('urlInput');
             const apiKeyInput = document.getElementById('apiKeyInput');
             const targetLangSelect = document.getElementById('targetLangSelect');
-            const urls = urlInput.value.split('\\n').filter(u => u.trim());
+            
+            const validUrls = parseUrls(urlInput.value);
             const apiKey = apiKeyInput.value.trim();
             const targetLang = targetLangSelect.value;
             
@@ -422,26 +505,32 @@
 
             hideError();
             if (!apiKey) {
-                showError([t.apiPlaceholder]); // Use translation for missing key error
+                showError([t.apiPlaceholder]);
                 return;
             }
+            
+            if (validUrls.length === 0) {
+                showError([uiStrings.parseError]);
+                return;
+            }
+
             localStorage.setItem('gemini_api_key', apiKey);
-            if (urls.length === 0) {
-                showError([t.urlPlaceholder]); 
-                return;
-            }
+            
             const btn = document.getElementById('convertBtn');
             const loading = document.getElementById('loading');
             const resultContainer = document.getElementById('resultContainer');
             const loadingText = document.getElementById('loadingText');
             const progressBar = document.getElementById('progressBar');
             const progressPercent = document.getElementById('progressPercent');
+            
             btn.disabled = true;
             loading.classList.remove('hidden');
             resultContainer.classList.add('hidden');
+            
             let progress = 0;
             const steps = t.loadingSteps;
             let stepIdx = 0;
+            
             const progressInterval = setInterval(() => {
                 if (progress < 30) progress += Math.random() * 5;
                 else if (progress < 70) progress += Math.random() * 2;
@@ -449,41 +538,52 @@
                 if (progress > 100) progress = 100;
                 progressBar.style.width = `${progress}%`;
                 progressPercent.innerText = `${Math.round(progress)}%`;
+                
                 if (progress > 25 && stepIdx === 0) stepIdx = 1;
                 if (progress > 50 && stepIdx === 1) stepIdx = 2;
                 if (progress > 80 && stepIdx === 2) stepIdx = 3;
                 loadingText.innerText = steps[stepIdx];
             }, 200);
+
             try {
                 const formData = new FormData();
-                formData.append('urls', urlInput.value);
+                formData.append('urls', validUrls.join('\n'));
                 formData.append('api_key', apiKey);
                 formData.append('target_lang', targetLang);
+                
                 const response = await fetch('/convert', { method: 'POST', body: formData });
                 const data = await response.json();
+                
                 if (data.error) {
                     showError([data.error]);
                 } else {
                     progress = 100;
                     progressBar.style.width = '100%';
                     progressPercent.innerText = '100%';
+                    
                     setTimeout(async () => {
                         const results = data.results;
                         const successful = results.filter(r => !r.error);
                         const failed = results.filter(r => r.error);
+                        
                         if (successful.length === 0) {
                             const errorMsgs = failed.map(f => `${f.url} : ${f.error}`);
                             showError(errorMsgs);
                         } else {
+                            conversionResults = successful;
+                            renderTabs(successful);
+                            
                             const firstResult = successful[0];
                             currentArticle = firstResult.article;
                             const titleMatch = currentArticle.match(/^#\s+(.*)$/m);
-                            currentTitle = titleMatch ? titleMatch[1] : "YouTube 轉文章";
+                            currentTitle = titleMatch ? titleMatch[1] : (firstResult.title || "YouTube 轉文章");
                             showArticle(currentArticle, currentTitle);
+                            
                             if (failed.length > 0) {
                                 const errorMsgs = failed.map(f => `${f.url} : ${f.error}`);
                                 showError(errorMsgs);
                             }
+                            showToast(uiStrings.successBatch);
                         }
                         await loadHistory();
                     }, 500);
