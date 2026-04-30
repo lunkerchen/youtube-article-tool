@@ -202,11 +202,15 @@
                 title: 'YouTube 轉文章工具 v3.1',
                 subtitle: '高效並行轉換 | 結構化深度知識庫',
                 apiLabel: 'Gemini API Key',
+                apiHint: '僅儲存於本機瀏覽器',
                 apiPlaceholder: '輸入你的 Gemini API Key...',
                 uiLangLabel: '介面語言',
                 targetLangLabel: '文章輸出語系',
+                urlLabel: 'YouTube 影片連結',
+                urlHint: '支援多行、逗號或空格分隔',
                 urlPlaceholder: '貼上連結... (可同時貼入多個，系統會自動解析)',
                 convertBtn: '立即啟動並行轉換',
+                clearBtn: '清除輸入',
                 errorTitle: '發生錯誤或部分轉換失敗',
                 loadingSteps: ["🔍 初始化並行隊列...", "📥 批量提取字幕...", "🧹 並行清洗數據...", "🤖 AI 深度重構文章..."],
                 resultMsg: '文章已生成',
@@ -223,11 +227,15 @@
                 title: 'YouTube 转文章工具 v3.1',
                 subtitle: '高效并行转换 | 结构化深度知识库',
                 apiLabel: 'Gemini API Key',
+                apiHint: '仅存储于本机浏览器',
                 apiPlaceholder: '输入你的 Gemini API Key...',
                 uiLangLabel: '界面语言',
                 targetLangLabel: '文章输出语系',
+                urlLabel: 'YouTube 视频链接',
+                urlHint: '支持多行、逗号或空格分隔',
                 urlPlaceholder: '粘贴链接... (可同时貼入多个，系统会自动解析)',
                 convertBtn: '立即启动并行转换',
+                clearBtn: '清除输入',
                 errorTitle: '发生错误或部分转换失败',
                 loadingSteps: ["🔍 初始化并行队列...", "📥 批量提取字幕...", "🧹 并行清洗数据...", "🤖 AI 深度重构文章..."],
                 resultMsg: '文章已生成',
@@ -244,11 +252,15 @@
                 title: 'YouTube to Article v3.1',
                 subtitle: 'High-efficiency Parallel Conversion | Structured Knowledge Base',
                 apiLabel: 'Gemini API Key',
+                apiHint: 'Stored locally in browser',
                 apiPlaceholder: 'Enter your Gemini API Key...',
                 uiLangLabel: 'UI Language',
                 targetLangLabel: 'Target Article Language',
+                urlLabel: 'YouTube Video Links',
+                urlHint: 'Supports multiple lines, commas, or spaces',
                 urlPlaceholder: 'Paste links... (multiple supported, auto-parsing)',
                 convertBtn: 'Start Parallel Conversion',
+                clearBtn: 'Clear Input',
                 errorTitle: 'Errors occurred or partial failure',
                 loadingSteps: ["🔍 Initializing parallel queue...", "📥 Batch extracting subtitles...", "🧹 Parallel data cleaning...", "🤖 AI deep restructuring..."],
                 resultMsg: 'Article generated',
@@ -265,11 +277,15 @@
                 title: 'YouTube 記事変換ツール v3.1',
                 subtitle: '高効率並列変換 | 構造化ナレッジベース',
                 apiLabel: 'Gemini API Key',
+                apiHint: 'ブラウザにのみ保存されます',
                 apiPlaceholder: 'Gemini API Keyを入力してください...',
                 uiLangLabel: 'UI言語',
                 targetLangLabel: '出力記事の目標言語',
+                urlLabel: 'YouTube動画リンク',
+                urlHint: '複数行、カンマ、またはスペース区切りに対応',
                 urlPlaceholder: 'リンクを貼り付けてください (複数対応、自動解析)',
                 convertBtn: '並列変換を開始',
+                clearBtn: '入力をクリア',
                 errorTitle: 'エラーが発生しました、または一部轉換に失敗しました',
                 loadingSteps: ["🔍 並列キューを初期化中...", "📥 字幕を一括抽出中...", "🧹 データを並列クレンジング中...", "🤖 AIが記事を深く再構成中..."],
                 resultMsg: '記事が生成されました',
@@ -353,6 +369,7 @@
 
         function changeUILanguage() {
             const lang = document.getElementById('uiLangSelect').value;
+            localStorage.setItem('ui_lang', lang);
             const t = i18n[lang];
             
             document.title = t.title;
@@ -366,11 +383,39 @@
             document.getElementById('apiKeyInput').placeholder = t.apiPlaceholder;
             document.getElementById('uiLangLabel').innerText = t.uiLangLabel;
             
+            // 更新 API Key Hint
+            const apiHint = document.querySelector('#apiKeyInput').parentElement.querySelector('.text-slate-500');
+            if (apiHint) apiHint.innerText = t.apiHint;
+
+            // 更新 文章輸出語系 Label
+            const targetLangLabel = document.querySelector('label[class*="text-sm font-semibold text-slate-300"]');
+            // 注意：這裡有兩個 label，需要精確定位第二個
+            const labels = document.querySelectorAll('label.text-sm.font-semibold.text-slate-300');
+            if (labels[1]) labels[1].innerText = t.targetLangLabel;
+            
             const urlInput = document.getElementById('urlInput');
             if (urlInput) urlInput.placeholder = t.urlPlaceholder;
             
+            // 更新 YouTube 連結 Label 與 Hint
+            const urlLabelContainer = document.querySelector('#urlInput').parentElement.querySelector('.flex.items-center.gap-3');
+            if (urlLabelContainer) {
+                const label = urlLabelContainer.querySelector('label');
+                const hint = urlLabelContainer.querySelector('span');
+                if (label) label.innerText = t.urlLabel;
+                if (hint) hint.innerText = t.urlHint;
+            }
+            
             const convertBtn = document.getElementById('convertBtn');
             if (convertBtn) convertBtn.innerHTML = `<svg class="group-hover:rotate-12 transition-transform" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> ${t.convertBtn} <span class="text-xs font-normal opacity-50 ml-1">(Ctrl+Enter)</span>`;
+            
+            // 更新 清除輸入按鈕
+            const clearBtn = document.querySelector('button[onclick="clearInput()"]');
+            if (clearBtn) {
+                const btnText = clearBtn.querySelector('span') || clearBtn;
+                // 如果按鈕內有 span 就改 span，否則直接改 innerHTML (保留 SVG)
+                const svg = clearBtn.querySelector('svg').outerHTML;
+                clearBtn.innerHTML = `${svg} ${t.clearBtn}`;
+            }
             
             const errorSpan = document.querySelector('#errorDisplay .flex.items-center.gap-2.font-bold.mb-1 span');
             if (errorSpan) errorSpan.innerText = t.errorTitle;
@@ -605,6 +650,11 @@
             const savedKey = localStorage.getItem('gemini_api_key');
             if (savedKey) {
                 document.getElementById('apiKeyInput').value = savedKey;
+            }
+            const savedLang = localStorage.getItem('ui_lang');
+            if (savedLang) {
+                document.getElementById('uiLangSelect').value = savedLang;
+                changeUILanguage();
             }
             loadHistory();
         };
