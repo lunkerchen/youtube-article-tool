@@ -6,6 +6,7 @@ A high-performance pipeline that transforms YouTube videos into high-quality, st
 
 - [English](./docs/en.md)
 - [繁體中文](./docs/zh-TW.md)
+- [日本語](./docs/jp.md)
 
 ---
 
