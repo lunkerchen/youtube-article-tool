@@ -74,6 +74,7 @@
                 <select id="uiLangSelect" onchange="changeUILanguage()" 
                         class="bg-[#1e293b] border border-slate-600 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
                     <option value="zh-TW" selected>繁體中文</option>
+                    <option value="zh-CN">简体中文</option>
                     <option value="en">English</option>
                     <option value="ja">日本語</option>
                 </select>
@@ -184,6 +185,27 @@
                 deleteFail: '刪除失敗',
                 copySuccess: 'Markdown 已複製到剪貼簿！',
                 requestFail: '請求失敗: '
+            },
+            'zh-CN': {
+                title: 'YouTube 转文章工具 v3.1',
+                subtitle: '高效并行转换 -> 结构化深度知识库',
+                apiLabel: 'Gemini API Key',
+                apiPlaceholder: '输入你的 Gemini API Key...',
+                uiLangLabel: '界面语言',
+                targetLangLabel: '输出文章目标语言',
+                urlPlaceholder: '粘贴 YouTube 链接 (每行一个，支持多视频并行转换...)',
+                convertBtn: '立即启动并行转换',
+                errorTitle: '发生错误或部分转换失败',
+                loadingSteps: ["🔍 初始化并行队列...", "📥 批量提取字幕...", "🧹 并行清洗数据...", "🤖 AI 深度重构文章..."],
+                resultMsg: '文章已生成',
+                downloadBtn: '下载 MD 文件',
+                copyBtn: '复制 Markdown',
+                historyTitle: '📜 最近转换记录',
+                noHistory: '尚无记录',
+                confirmDelete: '确定要删除这条记录吗？',
+                deleteFail: '删除失败',
+                copySuccess: 'Markdown 已复制到剪贴板！',
+                requestFail: '请求失败: '
             },
             'en': {
                 title: 'YouTube to Article v3.1',
