@@ -1,3 +1,4 @@
-temp/
 __pycache__/
-history.json
+temp/
+data/
+.DS_Store

@@ -16,8 +16,9 @@ app = FastAPI()
 # 配置目錄
 BASE_DIR = "/Users/lunker/youtube-article-tool"
 TEMP_DIR = os.path.join(BASE_DIR, "temp")
-HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
+HISTORY_FILE = os.path.join(BASE_DIR, "data", "history.json")
 os.makedirs(TEMP_DIR, exist_ok=True)
+os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
 
 # API 配置
 LLM_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent"
@@ -111,7 +112,7 @@ async def call_llm(text, meta, api_key, target_lang="中文"):
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    with open(os.path.join(BASE_DIR, "templates", "index.html"), "r", encoding="utf-8") as f:
+    with open(os.path.join(BASE_DIR, "app", "templates", "index.html"), "r", encoding="utf-8") as f:
         return f.read()
 
 @app.get("/history")
