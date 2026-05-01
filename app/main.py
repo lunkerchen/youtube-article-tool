@@ -162,21 +162,41 @@ async def delete_history(url: str):
     except Exception as e:
         return {"error": str(e)}
 
+async def get_video_meta(url, retries=2):
+    """取得影片元數據，含 BrokenPipeError 重試機制"""
+    last_err = None
+    for attempt in range(retries + 1):
+        try:
+            meta_result = subprocess.run(
+                ["yt-dlp", "--dump-json", "--skip-download", url],
+                capture_output=True, timeout=30
+            )
+            if meta_result.returncode != 0:
+                err = meta_result.stderr.decode('utf-8', errors='replace')[:300]
+                return None, f"無法取得影片資訊: {err}"
+            return json.loads(meta_result.stdout.decode('utf-8')), None
+        except BrokenPipeError as e:
+            last_err = f"BrokenPipeError (try {attempt+1}/{retries+1}): {e}"
+            print(f"[WARN] {last_err} — retrying...")
+            await asyncio.sleep(1 * (attempt + 1))  # 遞增延遲
+        except subprocess.TimeoutExpired:
+            return None, "yt-dlp 逾時 (30s)，可能是影片資訊過大或連線不穩"
+        except Exception as e:
+            return None, f"取得影片資訊失敗: {e}"
+    return None, last_err or "無法取得影片資訊（重試耗盡）"
+
 async def process_single_video(url, api_key, target_lang="中文"):
+    meta_file = None
+    task_temp = None
     try:
+        meta, meta_err = await get_video_meta(url)
+        if meta_err:
+            return {"url": url, "error": meta_err}
+        
+        # 將 meta 寫入暫存檔供後續使用（保持向後相容）
         meta_file = os.path.join(TEMP_DIR, f"meta_{os.urandom(4).hex()}.json")
-        # 改用 capture_output=True 避免 file handle 直接傳給 subprocess 導致的 Broken pipe
-        meta_result = subprocess.run(
-            ["yt-dlp", "--dump-json", "--skip-download", url],
-            capture_output=True, timeout=30
-        )
-        if meta_result.returncode != 0:
-            err = meta_result.stderr.decode('utf-8', errors='replace')[:300]
-            return {"url": url, "error": f"無法取得影片資訊: {err}"}
         with open(meta_file, 'w', encoding='utf-8') as f:
-            f.write(meta_result.stdout.decode('utf-8'))
-        with open(meta_file, 'r') as f:
-            meta = json.load(f)
+            json.dump(meta, f, ensure_ascii=False)
 
         # en 放最前面：多數影片是英文，避免自動翻譯語系觸發 429 而整批失敗
         common_langs = ["en", "zh", "zh-TW", "zh-HK", "zh-CN", "zh-Hans", "zh-Hant", "ja", "ko"]
@@ -260,6 +280,17 @@ async def process_single_video(url, api_key, target_lang="中文"):
         return {"url": url, "article": article, "title": meta.get("title", "未知標題")}
     except Exception as e:
         return {"url": url, "error": str(e)}
+    finally:
+        if task_temp and os.path.exists(task_temp):
+            try:
+                shutil.rmtree(task_temp)
+            except:
+                pass
+        if meta_file and os.path.exists(meta_file):
+            try:
+                os.remove(meta_file)
+            except:
+                pass
 
 @app.post("/convert")
 async def convert_videos(urls: str = Form(...), api_key: Optional[str] = Form(None), target_lang: Optional[str] = Form("中文")):
