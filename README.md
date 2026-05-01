@@ -54,10 +54,20 @@ AI-powered tool that transforms YouTube videos into deeply structured articles v
 git clone https://github.com/lunkerchen/youtube-article-tool.git
 cd youtube-article-tool
 pip install yt-dlp fastapi uvicorn httpx python-multipart
-export GEMINI_API_KEY="your-key-here"
+export GEMINI_API_KEY="***"
 bash start.sh
 # Open http://127.0.0.1:8080
 ```
+
+## Obsidian Export
+
+Export all converted articles to your Obsidian vault in one command:
+
+```bash
+python3 scripts/export-obsidian.py
+```
+
+Each article becomes a `.md` file with YAML frontmatter (`title`, `source`, `date`) — ready to browse, tag, and link in Obsidian. Already-exported articles are overwritten with the latest version. See [English docs](./docs/README.en.md#obsidian-export) for details.
 
 ---
 

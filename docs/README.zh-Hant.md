@@ -4,6 +4,30 @@
 
 ---
 
+### 💾 Obsidian 匯出
+
+一鍵將所有已轉換的文章同步至 Obsidian 知識庫：
+
+```bash
+python3 scripts/export-obsidian.py
+```
+
+**匯出路徑：**
+```
+~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Laban/YouTube-Articles/
+```
+
+**每篇文章包含：**
+- YAML frontmatter：`title`（原始標題）、`source`（YouTube 連結）、`date`（轉換日期）
+- 完整 Markdown 內容（H1-H3、列表、粗體等格式完整保留）
+- 檔名自動 sanitize（移除特殊符號），可直接在 Obsidian 中瀏覽與搜尋
+
+**注意事項：**
+- 同名檔案自動覆蓋（以 history.json 最新版本為準）
+- 不屬於 history.json 的舊殘留檔案不受影響，可手動清理
+
+---
+
 ## 🌐 其他語言版本
 
 - [English](./README.en.md) 🇺🇸
@@ -240,6 +264,8 @@ youtube-article-tool/
 │   ├── README.zh-Hans.md    # 簡體中文文件
 │   ├── README.en.md         # 英文文件
 │   └── README.ja.md         # 日文文件
+├── scripts/
+│   └── export-obsidian.py   # 將 history.json 同步至 Obsidian
 ├── start.sh                 # 快速啟動腳本
 ├── PATCH_NOTES.md           # 完整版本更新記錄
 └── requirements.txt         # Python 依賴清單
