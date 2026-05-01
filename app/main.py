@@ -80,7 +80,7 @@ def get_best_thumbnail(meta):
     video_id = meta.get("id")
     if not video_id: return ""
     # hqdefault 幾乎所有影片都有，比 maxresdefault 穩定得多
-    return f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
+    return f"https://img.youtube.com/vi/{video_id}/sddefault.jpg"
 
 async def call_llm(text, meta, api_key, target_lang="中文"):
     prompt = f"""

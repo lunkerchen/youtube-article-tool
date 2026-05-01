@@ -4,9 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube 轉文章工具 v3.2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
+        :root {
+            --color-bg: #0f172a;
+            --color-card: #1e293b;
+            --color-surface: #0f172a;
+            --color-accent: #3b82f6;
+            --color-accent-light: #60a5fa;
+            --color-text: #cbd5e1;
+            --color-text-muted: #94a3b8;
+            --color-border: #334155;
+            --radius-card: 1.5rem;
+            --radius-btn: 1rem;
+        }
         /* 高級排版系統 */
         .prose { 
             color: #94a3b8; 
@@ -77,11 +92,11 @@
 </head>
 <body class="bg-[#0f172a] text-slate-200 min-h-screen font-sans selection:bg-blue-500/30">
     <div class="max-w-4xl mx-auto px-4 py-8 relative">
-        <div class="absolute top-12 right-4 z-50">
-            <div class="flex flex-col gap-1">
-                <label id="uiLangLabel" class="text-[10px] font-medium text-slate-500 text-right block mr-1">介面語言</label>
-                <select id="uiLangSelect" onchange="changeUILanguage()" 
-                        class="bg-[#1e293b] border border-slate-600 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
+        <div class="md:absolute md:top-8 md:right-4 z-50 mb-4 md:mb-0">
+            <div class="flex md:flex-col items-center md:items-end gap-2 md:gap-1">
+                <label id="uiLangLabel" class="text-[10px] font-medium text-slate-400 block">介面語言</label>
+                <select id="uiLangSelect" onchange="changeUILanguage()" aria-label="UI Language" 
+                        class="bg-[#1e293b] border border-slate-600 rounded-lg px-3 py-1.5 md:px-2 md:py-1 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
                     <option value="zh-TW" selected>繁體中文</option>
                     <option value="zh-CN">简体中文</option>
                     <option value="en">English</option>
@@ -104,7 +119,7 @@
                     <div class="space-y-2">
                         <div class="flex justify-between items-center ml-1">
                             <label class="text-sm font-semibold text-slate-300">Gemini API Key</label>
-                            <span class="text-[10px] text-slate-500 flex items-center gap-1">
+                            <span class="text-[10px] text-slate-400 flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                                 僅儲存於本機瀏覽器
                             </span>
@@ -132,9 +147,9 @@
                     <div class="flex justify-between items-center ml-1">
                         <div class="flex items-center gap-3">
                             <label class="text-sm font-semibold text-slate-300">YouTube 影片連結</label>
-                            <span class="text-[10px] text-slate-500 italic">支援多行、逗號或空格分隔</span>
+                            <span class="text-[10px] text-slate-400 italic">支援多行、逗號或空格分隔</span>
                         </div>
-                        <button onclick="clearInput()" class="text-[10px] text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1">
+                        <button onclick="clearInput()" class="text-[10px] text-slate-400 hover:text-red-400 transition-colors flex items-center gap-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                             清除輸入
                         </button>
@@ -143,7 +158,7 @@
                               class="w-full h-40 bg-[#0f172a] border border-slate-600 focus:border-blue-500 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all resize-none placeholder:text-slate-700 font-mono text-sm"></textarea>
                     
                     <button id="convertBtn" onclick="convert()" 
-                            class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-4 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-50 shadow-xl shadow-blue-900/20 flex items-center justify-center gap-2 group">
+                            class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-4 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-blue-900/20 flex items-center justify-center gap-2 group">
                         <svg class="group-hover:rotate-12 transition-transform" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
                         立即啟動並行轉換 <span class="text-xs font-normal opacity-50 ml-1">(Ctrl+Enter)</span>
                     </button>
@@ -186,11 +201,11 @@
                     <!-- 分頁標籤將由 JS 動態生成 -->
                 </div>
                 <div class="flex gap-2 w-full md:w-auto shrink-0 border-t md:border-t-0 border-slate-700 pt-3 md:pt-0">
-                    <button onclick="downloadMarkdown()" class="flex-1 md:flex-none bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5">
+                    <button onclick="downloadMarkdown()" class="flex-1 md:flex-none bg-slate-700 hover:bg-slate-600 text-white px-2.5 md:px-4 py-1.5 md:py-2 rounded-xl text-[11px] md:text-xs transition-all flex items-center justify-center gap-1.5">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         下載 MD
                     </button>
-                    <button onclick="copyMarkdown()" class="flex-1 md:flex-none bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 px-4 py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 border border-blue-500/20">
+                    <button onclick="copyMarkdown()" class="flex-1 md:flex-none bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 px-2.5 md:px-4 py-1.5 md:py-2 rounded-xl text-[11px] md:text-xs transition-all flex items-center justify-center gap-1.5 border border-blue-500/20">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                         複製內容
                     </button>
@@ -351,11 +366,8 @@
         function clearInput() {
             const input = document.getElementById('urlInput');
             if (!input.value) return;
-            const lang = document.getElementById('uiLangSelect').value;
-            showConfirm(i18n[lang].clearConfirm, () => {
-                input.value = '';
-                input.focus();
-            });
+            input.value = '';
+            input.focus();
         }
 
         function switchResult(index) {
@@ -369,9 +381,11 @@
                 if (i === index) {
                     tab.classList.remove('bg-slate-800', 'text-slate-400');
                     tab.classList.add('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-900/40');
+                    tab.setAttribute('aria-selected', 'true');
                 } else {
                     tab.classList.add('bg-slate-800', 'text-slate-400');
                     tab.classList.remove('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-900/40');
+                    tab.setAttribute('aria-selected', 'false');
                 }
             });
         }
@@ -383,6 +397,8 @@
             results.forEach((res, i) => {
                 const btn = document.createElement('button');
                 btn.className = `result-tab flex-shrink-0 px-4 py-2 rounded-xl text-xs font-medium transition-all ${i === 0 ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`;
+                btn.setAttribute('role', 'tab');
+                btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
                 const shortTitle = res.title.length > 12 ? res.title.substring(0, 12) + '...' : res.title;
                 btn.innerText = `📄 ${shortTitle}`;
                 btn.onclick = () => switchResult(i);
@@ -472,6 +488,7 @@
 
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
+            toast.setAttribute('role', 'alert');
             toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white text-sm transition-all duration-300 transform translate-y-0 z-[100] ${
                 type === 'error' ? 'bg-red-600' : 'bg-blue-600'
             }`;
@@ -522,7 +539,7 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="text-white font-medium mb-1 truncate group-hover:text-blue-400 transition-all overflow-hidden whitespace-nowrap text-ellipsis">${item.title}</div>
-                            <div class="text-xs text-slate-500 truncate overflow-hidden whitespace-nowrap text-ellipsis">${item.date} · ${item.url}</div>
+                            <div class="text-xs text-slate-400 truncate overflow-hidden whitespace-nowrap text-ellipsis">${item.date} · ${item.url}</div>
                         </div>
                         <div class="flex-shrink-0 ml-2">
                             <button onclick="event.stopPropagation(); deleteItem('${item.url}')" class="p-2 hover:bg-red-500/20 rounded-lg text-slate-500 hover:text-red-400 transition-all" title="刪除">
@@ -541,7 +558,12 @@
             currentArticle = article;
             currentTitle = title;
             document.getElementById('emptyState').classList.add('hidden');
-            document.getElementById('result').innerHTML = marked.parse(article);
+            const resultDiv = document.getElementById('result');
+            resultDiv.classList.add('opacity-0');
+            setTimeout(() => {
+                resultDiv.innerHTML = marked.parse(article);
+                resultDiv.classList.remove('opacity-0');
+            }, 100);
             document.getElementById('resultContainer').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -562,6 +584,16 @@
             if(!currentArticle) return;
             await navigator.clipboard.writeText(currentArticle);
             const lang = document.getElementById('uiLangSelect').value;
+            const btn = document.querySelector('button[onclick="copyMarkdown()"]');
+            const origHtml = btn.innerHTML;
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> ' + (lang === 'ja' ? 'コピー完了' : (lang === 'en' ? 'Copied' : '已複製'));
+            btn.classList.add('bg-green-600/20', 'text-green-400', 'border-green-500/30');
+            btn.classList.remove('bg-blue-600/20', 'text-blue-400', 'border-blue-500/20');
+            setTimeout(() => {
+                btn.innerHTML = origHtml;
+                btn.classList.remove('bg-green-600/20', 'text-green-400', 'border-green-500/30');
+                btn.classList.add('bg-blue-600/20', 'text-blue-400', 'border-blue-500/20');
+            }, 1500);
             showToast(i18n[lang].copySuccess);
         }
 
