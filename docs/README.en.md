@@ -14,6 +14,8 @@ An AI-powered tool that transforms YouTube video content into deeply structured 
   `["zh", "zh-TW", "zh-HK", "zh-CN", "zh-Hans", "zh-Hant", "en", "ja", "ko"]`
   Falls back gracefully through the list until usable subtitles are found.
 
+- **Multi-Format Subtitle Support**: Supports VTT, SRT, and JSON subtitle formats. If the priority language list fails to match any subtitles, automatically retries with `--sub-langs all` to capture any available subtitle track.
+
 - **Multilingual**:
   - **UI Languages**: 4 interface languages — English, Traditional Chinese (zh-TW), Simplified Chinese (zh-CN), Japanese (ja).
   - **Target Output Languages**: 7 supported output languages for the generated articles.
@@ -45,7 +47,7 @@ This tool requires a Google Gemini API key. The priority chain is:
 2. **Environment variable** — set `GEMINI_API_KEY` before launching:
 
 ```bash
-export GEMINI_API_KEY="your-api-key-here"
+export GEMINI_API_KEY="***"
 ```
 
 3. If neither is provided, the tool will show an error prompting you to enter a key.
@@ -70,6 +72,17 @@ The conversion process is straightforward — 4 steps:
 ---
 
 ## 📝 Patch Notes
+
+### v3.3 — UX Polish & Subtitle Format Expansion
+
+- **Subtitle Format Expansion**: Added support for SRT and JSON subtitle formats alongside the existing VTT format. The extraction pipeline now tries all three formats when searching for subtitles, greatly increasing compatibility with videos that only offer specific subtitle formats.
+- **Automatic Fallback to All Languages**: When the configured priority language list fails to produce subtitles for a video, the system automatically retries with `--sub-langs all` to capture any subtitle track in any language.
+- **Custom Confirm Modal**: Replaced the browser-native `confirm()` dialog with a styled custom modal component, providing a consistent look and feel across all browsers and platforms.
+- **Deterministic Progress Bar**: Replaced the previous indeterminate spinner with a deterministic progress bar that shows real percentage completion and estimated time remaining, giving users clear visibility into the conversion process.
+- **Inter Font Loading**: The Inter font family is now loaded with CSS custom properties for consistent typography across the interface, with proper font-display fallback handling.
+- **Accessibility Improvements**: Added proper `aria-label` attributes to interactive elements, improved color contrast ratios for text readability, added `role` attributes for semantic structure, and ensured keyboard-navigable controls throughout the UI.
+- **Copy Button Visual Feedback**: Copy-to-clipboard buttons now show a brief visual feedback animation (checkmark + color transition) on success, making the action's result immediately apparent without relying solely on toast notifications.
+- **Mobile-Responsive Language Switcher**: Redesigned the language selector to be fully touch-friendly on mobile devices, with larger tap targets, improved dropdown positioning, and smooth transitions.
 
 ### v3.2 — UI/UX Refinement
 
@@ -98,7 +111,7 @@ The conversion process is straightforward — 4 steps:
 | **Backend** | FastAPI (Python) + asyncio + httpx |
 | **Frontend** | Tailwind CSS + Marked.js (vanilla JS, no framework) |
 | **AI Model** | Google Gemini Flash (`gemini-flash-latest`) |
-| **Subtitle Extraction** | yt-dlp (VTT format, auto-generated + manual subtitles) |
+| **Subtitle Extraction** | yt-dlp (VTT, SRT, JSON formats; auto-generated + manual subtitles) |
 
 ---
 
@@ -128,7 +141,19 @@ youtube-article-tool/
 
 - **API Key Privacy**: Your API key is stored in the browser's `localStorage` only. It is never sent to or stored on the server. The key is transmitted to Google Gemini directly via the backend proxy, not persisted.
 
-- **Subtitle Dependency**: This tool requires video subtitles to function. Auto-generated subtitles count — but if a video has no subtitles at all (auto or manual), conversion is not possible.
+- **Subtitle Dependency**: This tool requires video subtitles to function. Auto-generated subtitles count — but if a video has no subtitles at all (auto or manual), conversion is not possible. The tool supports VTT, SRT, and JSON subtitle formats to maximize compatibility.
+
+- **Custom Confirm Modal**: The interface uses a custom-styled confirmation modal instead of the browser-native `confirm()` function. This ensures a consistent visual appearance across all browsers and operating systems, and allows for better keyboard handling and accessibility.
+
+- **Deterministic Progress Bar**: A real percentage-based progress bar replaces the older indeterminate spinner. It displays the current conversion stage, percentage complete, and estimated time remaining, giving clear feedback during long-running batch conversions.
+
+- **Inter Font Loading**: The Inter typeface is loaded via CSS `@font-face` rules with CSS custom properties (`--font-family-inter`). The font uses a swap fallback strategy to prevent layout shift, and the project includes a self-hosted subset for offline environments.
+
+- **Accessibility (a11y) Improvements**: The frontend includes proper `aria-label` attributes on all interactive elements (buttons, inputs, tabs, links), sufficient color contrast ratios for text and backgrounds (verified against WCAG AA standards), semantic `role` attributes for non-native interactive elements, and full keyboard navigation support with visible focus indicators.
+
+- **Copy Button Visual Feedback**: Clicking a "Copy Markdown" button triggers a short visual animation — the button briefly turns green and displays a checkmark icon before reverting. This provides immediate tactile confirmation of the action without relying solely on toast notifications, which can be missed or dismissed early.
+
+- **Mobile-Responsive Language Switcher**: The language selector dropdown has been redesigned with larger tap targets (minimum 44x44 px), positioned to avoid viewport clipping on small screens, and includes smooth open/close transitions. Touch events are handled natively without pointer-event shims.
 
 - **Long Videos**: For videos longer than ~1 hour, the tool includes built-in **Map-Reduce chunking** support to break the content into manageable segments before synthesis. This helps avoid AI context window limits.
 
