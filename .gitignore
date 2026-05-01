@@ -2,3 +2,7 @@ __pycache__/
 temp/
 data/
 .DS_Store
+.hermes/
+docs/en.md
+docs/jp.md
+docs/zh-TW.md
