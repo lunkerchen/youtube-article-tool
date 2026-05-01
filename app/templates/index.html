@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube 轉文章工具 v3.2</title>
+    <title data-i18n="title">YouTube 轉文章工具 v3.2</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -22,336 +22,1040 @@
             --radius-card: 1.5rem;
             --radius-btn: 1rem;
         }
-        /* 高級排版系統 */
-        .prose { 
-            color: #94a3b8; 
+        /* 主題：高對比 (High Contrast) */
+        [data-theme="highcontrast"] {
+            --color-bg: #000000;
+            --color-card: #1a1a1a;
+            --color-surface: #000000;
+            --color-accent: #ffd700;
+            --color-accent-light: #ffe44d;
+            --color-text: #ffffff;
+            --color-text-muted: #cccccc;
+            --color-border: #333333;
+        }
+        .prose {
+            color: #94a3b8;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             line-height: 1.8;
             letter-spacing: 0.01em;
+            font-size: 16px;
         }
-        .prose h1 { 
-            font-size: 2.5rem; 
-            font-weight: 800; 
-            margin-bottom: 2rem; 
+        .prose h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
             background: linear-gradient(to right, #60a5fa, #22d3ee);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             line-height: 1.2;
         }
-        .prose h2 { 
-            font-size: 1.75rem; 
-            font-weight: 700; 
-            margin-top: 3rem; 
-            margin-bottom: 1.25rem; 
-            color: #60a5fa; 
+        .prose h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 3rem;
+            margin-bottom: 1.25rem;
+            color: #60a5fa;
             border-left: 5px solid #3b82f6;
             padding-left: 1rem;
             line-height: 1.3;
         }
-        .prose h3 { 
-            font-size: 1.4rem; 
-            font-weight: 600; 
-            margin-top: 2rem; 
-            margin-bottom: 1rem; 
-            color: #cbd5e1; 
+        .prose h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
         }
         .prose p { margin-bottom: 1.5rem; }
         .prose ul { list-style-type: none; margin-left: 0; margin-bottom: 1.5rem; }
-        .prose li { 
-            margin-bottom: 0.75rem; 
-            position: relative; 
-            padding-left: 1.5rem; 
+        .prose li {
+            margin-bottom: 0.75rem;
+            position: relative;
+            padding-left: 1.5rem;
         }
-        .prose li::before { 
-            content: "•"; 
-            color: #3b82f6; 
-            font-weight: bold; 
-            position: absolute; 
-            left: 0; 
+        .prose li::before {
+            content: "•";
+            color: #3b82f6;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
         }
         .prose strong { color: #f8fafc; font-weight: 600; }
-        .prose blockquote { 
-            border-left: 4px solid #3b82f6; 
-            padding: 1rem 1.5rem; 
-            font-style: italic; 
-            color: #94a3b8; 
-            margin: 2rem 0; 
+        .prose blockquote {
+            border-left: 4px solid #3b82f6;
+            padding: 1rem 1.5rem;
+            font-style: italic;
+            color: #94a3b8;
+            margin: 2rem 0;
             background: rgba(59, 130, 246, 0.1);
             border-radius: 0 0.75rem 0.75rem 0;
         }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
         @keyframes fade-in {
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
         }
-        .animate-fade-in {
-            animation: fade-in 0.15s ease-out;
+        .animate-fade-in { animation: fade-in 0.15s ease-out; }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
+        .skeleton {
+            background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s ease-in-out infinite;
+            border-radius: 0.75rem;
+        }
+
+        @keyframes slide-up {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-up { animation: slide-up 0.3s ease-out; }
+
+        @keyframes toast-progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: inline-block;
+        }
+
+        [data-tooltip] {
+            position: relative;
+        }
+        [data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: #cbd5e1;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s;
+            border: 1px solid #334155;
+        }
+        [data-tooltip]:hover::after {
+            opacity: 1;
+        }
+
+        /* ===== 主題切換覆寫 ===== */
+        /* 高對比主題 */
+        body[data-theme="highcontrast"] { background: #000 !important; color: #fff !important; }
+        body[data-theme="highcontrast"] header { background: rgba(0,0,0,0.9) !important; border-color: #333 !important; }
+        body[data-theme="highcontrast"] .bg-\\[#0f172a\\] { background: #000 !important; }
+        body[data-theme="highcontrast"] .bg-\\[#1e293b\\] { background: #1a1a1a !important; border-color: #333 !important; }
+        body[data-theme="highcontrast"] .bg-\\[#1e293b\\]\\/50 { background: rgba(26,26,26,0.5) !important; }
+        body[data-theme="highcontrast"] .bg-\\[#1e293b\\]\\/30 { background: rgba(26,26,26,0.3) !important; }
+        body[data-theme="highcontrast"] .text-slate-200, body[data-theme="highcontrast"] .text-slate-300,
+        body[data-theme="highcontrast"] .text-white { color: #fff !important; }
+        body[data-theme="highcontrast"] .text-slate-400, body[data-theme="highcontrast"] .text-slate-500,
+        body[data-theme="highcontrast"] .text-slate-600 { color: #ccc !important; }
+        body[data-theme="highcontrast"] .border-slate-700, body[data-theme="highcontrast"] .border-slate-700\\/50,
+        body[data-theme="highcontrast"] .border-slate-800\\/50 { border-color: #333 !important; }
+        body[data-theme="highcontrast"] .border-slate-600 { border-color: #555 !important; }
+        body[data-theme="highcontrast"] .bg-slate-700 { background: #333 !important; color: #fff !important; }
+        body[data-theme="highcontrast"] .bg-slate-800 { background: #1a1a1a !important; color: #fff !important; }
+        body[data-theme="highcontrast"] .hover\\:bg-slate-700:hover { background: #444 !important; }
+        body[data-theme="highcontrast"] .hover\\:bg-slate-600:hover { background: #555 !important; }
+        body[data-theme="highcontrast"] .text-blue-400 { color: #ffd700 !important; }
+        body[data-theme="highcontrast"] .from-blue-600 { --tw-gradient-from: #ffd700 !important; }
+        body[data-theme="highcontrast"] .to-blue-700 { --tw-gradient-to: #e6c200 !important; }
+        body[data-theme="highcontrast"] .hover\\:from-blue-500:hover { --tw-gradient-from: #ffe44d !important; }
+        body[data-theme="highcontrast"] .hover\\:to-blue-600:hover { --tw-gradient-to: #ffd700 !important; }
+        body[data-theme="highcontrast"] .shadow-blue-900\\/20 { box-shadow: 0 4px 6px rgba(255,215,0,0.15) !important; }
+        body[data-theme="highcontrast"] .prose { color: #ddd !important; }
+        body[data-theme="highcontrast"] .prose h2 { color: #ffd700 !important; border-left-color: #ffd700 !important; }
+        body[data-theme="highcontrast"] .prose strong { color: #fff !important; }
+        body[data-theme="highcontrast"] .prose blockquote { background: rgba(255,215,0,0.08) !important; border-left-color: #ffd700 !important; }
+        body[data-theme="highcontrast"] .skeleton { background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%) !important; background-size: 200% 100% !important; }
+        body[data-theme="highcontrast"] #backToTop { background: #ffd700 !important; color: #000 !important; }
+        body[data-theme="highcontrast"] select { background: #1a1a1a !important; border-color: #555 !important; color: #fff !important; }
+        body[data-theme="highcontrast"] input { background: #1a1a1a !important; border-color: #555 !important; color: #fff !important; }
+        body[data-theme="highcontrast"] textarea { background: #1a1a1a !important; border-color: #555 !important; color: #fff !important; }
+        body[data-theme="highcontrast"] .theme-dot { background: #ffd700 !important; }
     </style>
 </head>
-<body class="bg-[#0f172a] text-slate-200 min-h-screen font-sans selection:bg-blue-500/30">
-    <div class="max-w-4xl mx-auto px-4 py-8 relative">
-        <div class="md:absolute md:top-8 md:right-4 z-50 mb-4 md:mb-0">
-            <div class="flex md:flex-col items-center md:items-end gap-2 md:gap-1">
-                <label id="uiLangLabel" class="text-[10px] font-medium text-slate-400 block">介面語言</label>
-                <select id="uiLangSelect" onchange="changeUILanguage()" aria-label="UI Language" 
-                        class="bg-[#1e293b] border border-slate-600 rounded-lg px-3 py-1.5 md:px-2 md:py-1 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
-                    <option value="zh-TW" selected>繁體中文</option>
-                    <option value="zh-CN">简体中文</option>
-                    <option value="en">English</option>
-                    <option value="ja">日本語</option>
-                </select>
+<body class="bg-[#0f172a] text-slate-200 min-h-screen font-sans selection:bg-blue-500/30"
+      data-theme="dark">
+
+    <!-- ===== 頂部導航欄 ===== -->
+    <header class="sticky top-0 z-50 bg-[#0f172a]/80 backdrop-blur-xl border-b border-slate-800/50">
+        <div class="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.94 2C5.12 20 12 20 12 20s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/>
+                    <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+                </svg>
+                <h1 data-i18n="navTitle" class="text-sm font-bold text-white tracking-tight">
+                    <span class="text-blue-400">YouTube</span> 轉文章
+                </h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <!-- 主題切換 -->
+                <div class="flex items-center gap-1 bg-[#1e293b] border border-slate-600 rounded-lg px-1.5 py-1">
+                    <button onclick="setTheme('dark')" class="theme-btn w-5 h-5 rounded-full flex items-center justify-center transition-all bg-blue-500 text-white" data-theme-btn="dark" title="深色主題">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    </button>
+                    <button onclick="setTheme('highcontrast')" class="theme-btn w-5 h-5 rounded-full flex items-center justify-center transition-all bg-transparent text-slate-400" data-theme-btn="highcontrast" title="高對比主題">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><polyline points="8 12 12 16 16 12"/></svg>
+                    </button>
+                </div>
+                <!-- 語言選擇器 -->
+                <div class="relative">
+                    <select id="uiLangSelect" onchange="changeUILanguage()" aria-label="UI Language"
+                            class="appearance-none bg-[#1e293b] border border-slate-600 rounded-lg pl-3 pr-7 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
+                        <option value="zh-TW" selected>繁體</option>
+                        <option value="zh-CN">简体</option>
+                        <option value="en">EN</option>
+                        <option value="ja">日本語</option>
+                    </select>
+                    <svg class="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </div>
             </div>
         </div>
+    </header>
 
-        <header class="text-center mb-10">
-            <h1 class="text-4xl font-extrabold text-white mb-4 tracking-tight">
-                <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">YouTube</span> 轉文章
-            </h1>
-            <p class="text-slate-400 text-base font-light tracking-wide">高效並行轉換 <span class="mx-2 text-slate-600">|</span> 結構化深度知識庫</p>
-        </header>
-
-        <div class="space-y-6 mb-8">
-            <!-- 配置區塊 -->
-            <div class="bg-[#1e293b]/50 backdrop-blur-sm p-8 rounded-3xl border border-slate-700/50 shadow-xl">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center ml-1">
-                            <label class="text-sm font-semibold text-slate-300">Gemini API Key</label>
-                            <span class="text-[10px] text-slate-400 flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                僅儲存於本機瀏覽器
-                            </span>
-                        </div>
-                        <input id="apiKeyInput" type="password" placeholder="輸入你的 Gemini API Key..." 
-                               class="w-full bg-[#0f172a] border border-slate-600 focus:border-blue-500 rounded-2xl px-5 py-3 text-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-600">
+    <div class="max-w-4xl mx-auto px-6 py-8">
+        <!-- ===== 設定卡片 ===== -->
+        <div class="bg-[#1e293b]/50 backdrop-blur-sm rounded-3xl border border-slate-700/50 shadow-xl overflow-hidden mb-8">
+            <!-- API Key 區塊 -->
+            <div class="p-6 md:p-8 border-b border-slate-700/50">
+                <div class="flex items-center justify-between mb-4">
+                    <label class="text-sm font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        <span data-i18n="apiLabel">Gemini API Key</span>
+                    </label>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-slate-500 flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                            <span data-i18n="apiHint">僅儲存於本機</span>
+                        </span>
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-sm font-semibold text-slate-300 ml-1">文章輸出語系</label>
-                        <select id="targetLangSelect" 
-                                class="w-full bg-[#0f172a] border border-slate-600 focus:border-blue-500 rounded-2xl px-5 py-3 text-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer appearance-none">
-                            <option value="中文">中文 (預設)</option>
-                            <option value="繁體中文">繁體中文</option>
-                            <option value="English">English</option>
+                </div>
+                <div class="relative">
+                    <input id="apiKeyInput" type="password" placeholder="AIzaSy..."
+                           class="w-full bg-[#0f172a] border border-slate-600 focus:border-blue-500 rounded-xl px-4 py-2.5 pr-10 text-sm text-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-600 font-mono"
+                           data-i18n-placeholder="apiPlaceholder">
+                    <button id="apiToggle" onclick="toggleApiKey()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors p-1" data-tooltip="顯示/隱藏 Key">
+                        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg id="eyeOffIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 輸入區塊 -->
+            <div class="p-5 md:p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400">
+                                <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.94 2C5.12 20 12 20 12 20s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/>
+                                <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+                            </svg>
+                            <span data-i18n="urlLabel">YouTube 影片連結</span>
+                        </span>
+                        <span class="text-[10px] text-slate-500 italic hidden sm:inline" data-i18n="urlHint">支援多行、逗號或空格分隔</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-slate-500 sm:hidden italic" data-i18n="urlHintShort">支援多行</span>
+                        <select id="targetLangSelect"
+                                class="bg-[#0f172a] border border-slate-600 rounded-lg px-2 py-1 text-[10px] text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer appearance-none">
+                            <option value="中文">中文</option>
+                            <option value="繁體中文">繁體</option>
+                            <option value="English">EN</option>
                             <option value="日本語">日本語</option>
                             <option value="한국어">한국어</option>
-                            <option value="Español">Español</option>
-                            <option value="Français">Français</option>
+                            <option value="Español">ES</option>
+                            <option value="Français">FR</option>
                         </select>
                     </div>
                 </div>
+                <textarea id="urlInput" data-i18n-placeholder="urlPlaceholder" placeholder="貼上連結... (可同時貼入多個)"
+                          class="w-full h-36 bg-[#0f172a] border border-slate-600 focus:border-blue-500 rounded-2xl px-5 py-4 text-white text-base focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all resize-none placeholder:text-slate-700 font-mono text-base"></textarea>
 
-                <!-- 輸入區塊 -->
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center ml-1">
-                        <div class="flex items-center gap-3">
-                            <label class="text-sm font-semibold text-slate-300">YouTube 影片連結</label>
-                            <span class="text-[10px] text-slate-400 italic">支援多行、逗號或空格分隔</span>
-                        </div>
-                        <button onclick="clearInput()" class="text-[10px] text-slate-400 hover:text-red-400 transition-colors flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                            清除輸入
-                        </button>
+                <div class="flex items-center gap-3 mt-4">
+                    <button id="convertBtn" onclick="convert()"
+                            class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-blue-900/20 flex items-center justify-center gap-2.5 group">
+                        <svg class="group-hover:translate-x-0.5 transition-transform" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>
+                        </svg>
+                        <span data-i18n="convertBtn">立即啟動並行轉換</span>
+                        <span class="text-xs font-normal opacity-40 ml-1 hidden sm:inline">(Enter)</span>
+                    </button>
+                    <button onclick="clearInput()" class="px-4 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded-2xl transition-all active:scale-[0.98] flex items-center gap-1.5 text-sm" data-tooltip="清空輸入">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </button>
+                </div>
+                <p class="text-xs text-slate-600 mt-2 text-center" data-i18n="outputHint">
+                    輸出目標語系可在右側下拉選單調整
+                </p>
+            </div>
+        </div>
+
+        <!-- ===== Loading 進度 ===== -->
+        <div id="loading" class="hidden mb-8">
+            <div class="bg-[#1e293b]/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="spinner"></span>
+                        <span id="loadingText" class="text-slate-300 text-sm font-medium">初始化中...</span>
                     </div>
-                    <textarea id="urlInput" placeholder="貼上連結... (可同時貼入多個，系統會自動解析)" 
-                              class="w-full h-40 bg-[#0f172a] border border-slate-600 focus:border-blue-500 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all resize-none placeholder:text-slate-700 font-mono text-sm"></textarea>
-                    
-                    <button id="convertBtn" onclick="convert()" 
-                            class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-4 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-blue-900/20 flex items-center justify-center gap-2 group">
-                        <svg class="group-hover:rotate-12 transition-transform" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                        立即啟動並行轉換 <span class="text-xs font-normal opacity-50 ml-1">(Ctrl+Enter)</span>
-                    </button>
+                    <span id="progressPercent" class="text-blue-400 font-bold text-sm font-mono">0%</span>
                 </div>
-            </div>
-        </div>
-
-        <!-- 錯誤訊息顯示區域 -->
-        <div id="errorDisplay" class="hidden mb-8 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm space-y-2">
-            <div class="flex items-center justify-between gap-2 font-bold mb-1">
-                <div class="flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12" y2="16"></line></svg>
-                    <span>發生錯誤或部分轉換失敗</span>
+                <div class="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+                    <div id="progressBar" class="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
                 </div>
-                <button onclick="hideError()" class="text-red-400/60 hover:text-red-300 transition-colors p-1" title="關閉">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            </div>
-            <div id="errorMessages" class="space-y-1 opacity-90"></div>
-        </div>
-
-        <div id="loading" class="hidden space-y-4 mb-12">
-            <div class="flex justify-between items-center mb-2">
-                <p id="loadingText" class="text-slate-400 text-lg font-medium">正在初始化並行隊列...</p>
-                <span id="progressPercent" class="text-blue-500 font-bold">0%</span>
-            </div>
-            <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
-                <div id="progressBar" class="bg-blue-500 h-full transition-all duration-300 ease-out" style="width: 0%"></div>
+                <p class="text-[10px] text-slate-600 mt-3 text-center" data-i18n="loadingNote">處理中請勿關閉頁面</p>
             </div>
         </div>
 
-        <div id="resultContainer" class="hidden space-y-4 mb-12">
+        <!-- ===== Skeleton Loading ===== -->
+        <div id="skeleton" class="hidden mb-8 space-y-4 animate-fade-in">
+            <div class="flex gap-2 mb-4">
+                <div class="skeleton h-9 w-24"></div>
+                <div class="skeleton h-9 w-24"></div>
+            </div>
+            <div class="skeleton h-6 w-3/4"></div>
+            <div class="skeleton h-4 w-full"></div>
+            <div class="skeleton h-4 w-5/6"></div>
+            <div class="skeleton h-4 w-2/3"></div>
+            <div class="skeleton h-4 w-full"></div>
+            <div class="skeleton h-4 w-4/5"></div>
+            <div class="skeleton h-4 w-3/4"></div>
+        </div>
+
+        <!-- ===== 結果區塊 ===== -->
+        <div id="resultContainer" class="hidden space-y-4 mb-8">
             <div id="emptyState" class="bg-[#1e293b]/30 rounded-3xl border border-dashed border-slate-700/50 p-12 text-center">
-                <div class="text-slate-600 text-4xl mb-4">📝</div>
-                <p class="text-slate-500 text-sm">貼上 YouTube 連結後點擊「開始轉換」，文章將在此處顯示</p>
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-4 text-slate-600">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                <p class="text-slate-500 text-sm" data-i18n="emptyState">貼上 YouTube 連結後點擊轉換</p>
             </div>
+
             <!-- 結果控制列 -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#1e293b] p-3 rounded-2xl border border-slate-700 gap-4">
-                <div id="resultTabs" class="flex gap-2 overflow-x-auto pb-1 md:pb-0 w-full md:w-auto scrollbar-hide">
-                    <!-- 分頁標籤將由 JS 動態生成 -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#1e293b] p-3 rounded-2xl border border-slate-700 gap-3" role="tablist" aria-label="Result tabs">
+                <div id="resultTabs" class="flex gap-2 overflow-x-auto pb-1 md:pb-0 w-full md:w-auto scrollbar-hide" role="tablist">
                 </div>
-                <div class="flex gap-2 w-full md:w-auto shrink-0 border-t md:border-t-0 border-slate-700 pt-3 md:pt-0">
-                    <button onclick="downloadMarkdown()" class="flex-1 md:flex-none bg-slate-700 hover:bg-slate-600 text-white px-2.5 md:px-4 py-1.5 md:py-2 rounded-xl text-[11px] md:text-xs transition-all flex items-center justify-center gap-1.5">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        下載 MD
+                <div class="flex gap-2 w-full md:w-auto shrink-0">
+                    <button onclick="downloadMarkdown()" class="flex-1 md:flex-none bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-sm transition-all flex items-center justify-center gap-1.5" id="downloadBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        <span data-i18n="downloadBtn">下載</span>
                     </button>
-                    <button onclick="copyMarkdown()" class="flex-1 md:flex-none bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 px-2.5 md:px-4 py-1.5 md:py-2 rounded-xl text-[11px] md:text-xs transition-all flex items-center justify-center gap-1.5 border border-blue-500/20">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        複製內容
+                    <button id="copyBtn" onclick="copyMarkdown()" class="flex-1 md:flex-none bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 px-3 py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 border border-blue-500/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                        <span data-i18n="copyBtn">複製內容</span>
                     </button>
                 </div>
             </div>
-            
-            <div id="result" class="bg-[#1e293b] p-8 md:p-12 rounded-3xl shadow-2xl border border-slate-700 prose max-w-none">
+
+            <div id="result" class="bg-[#1e293b] p-8 md:p-12 rounded-3xl shadow-2xl border border-slate-700 prose max-w-none animate-fade-in">
                 <!-- 文章內容將在此渲染 -->
             </div>
         </div>
 
-        <div id="historySection" class="mt-20">
-            <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <span>📜 最近轉換紀錄</span>
+        <!-- ===== 歷史紀錄 ===== -->
+        <div id="historySection" class="mt-16">
+            <h2 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span data-i18n="historyTitle">最近轉換紀錄</span>
             </h2>
-            <div id="historyList" class="grid gap-4">
-                <!-- 歷史紀錄將在此渲染 -->
+            <div id="historyList" class="grid gap-3">
             </div>
         </div>
 
-        <!-- Buy Me a Coffee -->
+        <!-- ===== Buy Me a Coffee ===== -->
         <div class="text-center mt-16 pb-4">
-            <a href="https://www.buymeacoffee.com/lunker" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.buymeacoffee.com/lunker" target="_blank" rel="noopener noreferrer"
+               class="inline-block hover:opacity-80 transition-opacity">
                 <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 50px; width: auto;">
             </a>
         </div>
     </div>
 
+    <!-- ===== 回到頂部按鈕 ===== -->
+    <button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"
+            class="fixed bottom-6 right-6 z-50 w-10 h-10 rounded-full bg-blue-600 text-white shadow-lg shadow-blue-900/40 flex items-center justify-center transition-all duration-300 opacity-0 translate-y-4 pointer-events-none hover:bg-blue-500 active:scale-90">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"/>
+        </svg>
+    </button>
+
+    <!-- ===== Toast Container ===== -->
+    <div id="toastContainer" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 pointer-events-none" style="max-width: 90vw;">
+    </div>
+
     <script>
+        // ====================================================================
+        //  i18n 系統
+        // ====================================================================
         const i18n = {
             'zh-TW': {
                 title: 'YouTube 轉文章工具 v3.2',
-                subtitle: '高效並行轉換 | 結構化深度知識庫',
+                navTitle: '<span class="text-blue-400">YouTube</span> 轉文章',
                 apiLabel: 'Gemini API Key',
                 apiHint: '僅儲存於本機瀏覽器',
                 apiPlaceholder: '輸入你的 Gemini API Key...',
-                uiLangLabel: '介面語言',
-                targetLangLabel: '文章輸出語系',
                 urlLabel: 'YouTube 影片連結',
                 urlHint: '支援多行、逗號或空格分隔',
-                urlPlaceholder: '貼上連結... (可同時貼入多個，系統會自動解析)',
-                convertBtn: '立即啟動並行轉換',
-                clearBtn: '清除輸入',
-                errorTitle: '發生錯誤或部分轉換失敗',
-                loadingSteps: ["🔍 初始化並行隊列...", "📥 批量提取字幕...", "🧹 並行清洗數據...", "🤖 AI 深度重構文章..."],
+                urlHintShort: '支援多行',
+                urlPlaceholder: '貼上網址... (可同時貼入多個，自動解析)',
+                convertBtn: '立即轉換',
+                outputHint: '輸出語系可在右側下拉選單調整',
+                loadingNote: '處理中請勿關閉頁面',
+                emptyState: '貼上 YouTube 連結後點擊轉換',
                 downloadBtn: '下載 MD',
                 copyBtn: '複製內容',
-                historyTitle: '📜 最近轉換紀錄',
-                noHistory: '尚無紀錄',
+                historyTitle: '最近轉換紀錄',
+                noHistory: '尚無轉換紀錄',
                 confirmDelete: '確定要刪除這條紀錄嗎？',
                 deleteFail: '刪除失敗',
-                copySuccess: 'Markdown 已複製到剪貼簿！',
+                copySuccess: '已複製到剪貼簿！',
                 requestFail: '請求失敗: ',
-                clearConfirm: '確定要清除輸入嗎？',
                 parseError: '找不到有效的 YouTube 連結',
-                successBatch: '批次轉換完成！'
+                successBatch: '批次轉換完成！',
+                copied: '已複製 ✓',
+                converting: '轉換中...',
+                clearConfirm: '確定要清空輸入嗎？',
+                initQueue: '🔍 初始化並行隊列...',
+                extractSubs: '📥 批量提取字幕...',
+                cleanData: '🧹 並行清洗數據...',
+                aiRewrite: '🤖 AI 深度重構文章...'
             },
             'zh-CN': {
                 title: 'YouTube 转文章工具 v3.2',
-                subtitle: '高效并行转换 | 结构化深度知识库',
+                navTitle: '<span class="text-blue-400">YouTube</span> 转文章',
                 apiLabel: 'Gemini API Key',
                 apiHint: '仅存储于本机浏览器',
                 apiPlaceholder: '输入你的 Gemini API Key...',
-                uiLangLabel: '界面语言',
-                targetLangLabel: '文章输出语系',
                 urlLabel: 'YouTube 视频链接',
                 urlHint: '支持多行、逗号或空格分隔',
-                urlPlaceholder: '粘贴链接... (可同时貼入多个，系统会自动解析)',
-                convertBtn: '立即启动并行转换',
-                clearBtn: '清除输入',
-                errorTitle: '发生错误或部分转换失败',
-                loadingSteps: ["🔍 初始化并行队列...", "📥 批量提取字幕...", "🧹 并行清洗数据...", "🤖 AI 深度重构文章..."],
+                urlHintShort: '支持多行',
+                urlPlaceholder: '粘贴网址... (可同时贴入多个，自动解析)',
+                convertBtn: '立即转换',
+                outputHint: '输出语系可在右侧下拉菜单调整',
+                loadingNote: '处理中请勿关闭页面',
+                emptyState: '粘贴 YouTube 链接后点击转换',
                 downloadBtn: '下载 MD',
                 copyBtn: '复制内容',
-                historyTitle: '📜 最近转换记录',
-                noHistory: '尚无记录',
+                historyTitle: '最近转换记录',
+                noHistory: '暂无转换记录',
                 confirmDelete: '确定要删除这条记录吗？',
                 deleteFail: '删除失败',
-                copySuccess: 'Markdown 已复制到剪贴板！',
+                copySuccess: '已复制到剪贴板！',
                 requestFail: '请求失败: ',
-                clearConfirm: '确定要清除输入吗？',
                 parseError: '找不到有效的 YouTube 链接',
-                successBatch: '批次转换完成！'
+                successBatch: '批次转换完成！',
+                copied: '已复制 ✓',
+                converting: '转换中...',
+                clearConfirm: '确定要清空输入吗？',
+                initQueue: '🔍 初始化并行队列...',
+                extractSubs: '📥 批量提取字幕...',
+                cleanData: '🧹 并行清洗数据...',
+                aiRewrite: '🤖 AI 深度重构文章...'
             },
             'en': {
                 title: 'YouTube to Article v3.2',
-                subtitle: 'High-efficiency Parallel Conversion | Structured Knowledge Base',
+                navTitle: '<span class="text-blue-400">YouTube</span> to Article',
                 apiLabel: 'Gemini API Key',
                 apiHint: 'Stored locally in browser',
                 apiPlaceholder: 'Enter your Gemini API Key...',
-                uiLangLabel: 'UI Language',
-                targetLangLabel: 'Target Article Language',
                 urlLabel: 'YouTube Video Links',
-                urlHint: 'Supports multiple lines, commas, or spaces',
-                urlPlaceholder: 'Paste links... (multiple supported, auto-parsing)',
-                convertBtn: 'Start Parallel Conversion',
-                clearBtn: 'Clear Input',
-                errorTitle: 'Errors occurred or partial failure',
-                loadingSteps: ["🔍 Initializing parallel queue...", "📥 Batch extracting subtitles...", "🧹 Parallel data cleaning...", "🤖 AI deep restructuring..."],
+                urlHint: 'Multiple lines, commas, or spaces',
+                urlHintShort: 'Multi-line support',
+                urlPlaceholder: 'Paste URLs... (multiple supported, auto-parsing)',
+                convertBtn: 'Convert Now',
+                outputHint: 'Target language adjustable on the right',
+                loadingNote: 'Please keep this page open',
+                emptyState: 'Paste YouTube links and click Convert',
                 downloadBtn: 'Download MD',
                 copyBtn: 'Copy Content',
-                historyTitle: '📜 Recent Conversions',
-                noHistory: 'No records found',
-                confirmDelete: 'Are you sure you want to delete this record?',
+                historyTitle: 'Recent Conversions',
+                noHistory: 'No records yet',
+                confirmDelete: 'Delete this record?',
                 deleteFail: 'Delete failed',
-                copySuccess: 'Markdown copied to clipboard!',
+                copySuccess: 'Copied to clipboard!',
                 requestFail: 'Request failed: ',
-                clearConfirm: 'Clear input?',
                 parseError: 'No valid YouTube links found',
-                successBatch: 'Batch conversion complete!'
+                successBatch: 'Batch conversion complete!',
+                copied: 'Copied ✓',
+                converting: 'Converting...',
+                clearConfirm: 'Clear input?',
+                initQueue: '🔍 Initializing queue...',
+                extractSubs: '📥 Extracting subtitles...',
+                cleanData: '🧹 Cleaning data...',
+                aiRewrite: '🤖 AI rewriting article...'
             },
             'ja': {
                 title: 'YouTube 記事変換ツール v3.2',
-                subtitle: '高効率並列変換 | 構造化ナレッジベース',
+                navTitle: '<span class="text-blue-400">YouTube</span> 記事変換',
                 apiLabel: 'Gemini API Key',
-                apiHint: 'ブラウザにのみ保存されます',
-                apiPlaceholder: 'Gemini API Keyを入力してください...',
-                uiLangLabel: 'UI言語',
-                targetLangLabel: '出力記事の目標言語',
+                apiHint: 'ブラウザに保存されます',
+                apiPlaceholder: 'Gemini API Keyを入力...',
                 urlLabel: 'YouTube動画リンク',
-                urlHint: '複数行、カンマ、またはスペース区切りに対応',
-                urlPlaceholder: 'リンクを貼り付けてください (複数対応、自動解析)',
-                convertBtn: '並列変換を開始',
-                clearBtn: '入力をクリア',
-                errorTitle: 'エラーが発生しました、または一部轉換に失敗しました',
-                loadingSteps: ["🔍 並列キューを初期化中...", "📥 字幕を一括抽出中...", "🧹 データを並列クレンジング中...", "🤖 AIが記事を深く再構成中..."],
-                downloadBtn: 'MD',
+                urlHint: '複数行、カンマ、スペース区切り対応',
+                urlHintShort: '複数行対応',
+                urlPlaceholder: 'URLを貼り付け... (複数対応、自動解析)',
+                convertBtn: '変換開始',
+                outputHint: '出力言語は右のプルダウンで選択',
+                loadingNote: '処理中はページを閉じないでください',
+                emptyState: 'YouTubeリンクを貼り付けて変換ボタンを押してください',
+                downloadBtn: 'MD保存',
                 copyBtn: 'コピー',
-                historyTitle: '📜 最近の轉換履歴',
+                historyTitle: '最近の変換履歴',
                 noHistory: '履歴はありません',
-                confirmDelete: 'この記録を削除してもよろしいですか？',
-                deleteFail: '削除に失敗しました',
-                copySuccess: 'Markdownをクリップボードにコピーしました！',
-                requestFail: 'リクエストに失敗しました: ',
-                clearConfirm: '入力をクリアしますか？',
+                confirmDelete: 'この記録を削除しますか？',
+                deleteFail: '削除失敗',
+                copySuccess: 'クリップボードにコピーしました！',
+                requestFail: 'リクエスト失敗: ',
                 parseError: '有効なYouTubeリンクが見つかりません',
-                successBatch: 'バッチ変換完了！'
+                successBatch: '一括変換完了！',
+                copied: 'コピー完了 ✓',
+                converting: '変換中...',
+                clearConfirm: '入力をクリアしますか？',
+                initQueue: '🔍 並列キューを初期化中...',
+                extractSubs: '📥 字幕を抽出中...',
+                cleanData: '🧹 データをクレンジング中...',
+                aiRewrite: '🤖 AIが記事を再構成中...'
             }
         };
 
-        // i18n keys clearConfirm / parseError / successBatch are now inside i18n[lang]
+        // ====================================================================
+        //  data-i18n 系統：自動掃描所有 [data-i18n] 元素
+        // ====================================================================
+        function applyI18n(lang) {
+            const t = i18n[lang];
+            if (!t) return;
 
-        let currentArticle = "";
-        let currentTitle = "";
+            // 1. Document title
+            document.title = t.title;
+
+            // 2. Elements with data-i18n — 直接 innerHTML (支援 HTML 如 navTitle)
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key] !== undefined) {
+                    el.innerHTML = t[key];
+                }
+            });
+
+            // 3. Placeholders
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (t[key] !== undefined) {
+                    el.placeholder = t[key];
+                }
+            });
+
+            // 4. Loading steps (stored as separate keys)
+            const loadingText = document.getElementById('loadingText');
+            if (loadingText) {
+                const currentText = loadingText.innerText;
+                // Don't override during active conversion
+                if (!currentText.includes('...') && !currentText.includes('中') && !currentText.includes('ing')) {
+                    loadingText.innerText = t.initQueue;
+                }
+            }
+        }
+
+        function changeUILanguage() {
+            const lang = document.getElementById('uiLangSelect').value;
+            localStorage.setItem('ui_lang', lang);
+            applyI18n(lang);
+            loadHistory();
+        }
+
+        // ====================================================================
+        //  Toast 系統（統一通知，含進度條 + hover 暫停）
+        // ====================================================================
+        function showToast(message, type = 'info', duration = 4000) {
+            const container = document.getElementById('toastContainer');
+
+            const toast = document.createElement('div');
+            toast.setAttribute('role', 'alert');
+            toast.className = `pointer-events-auto animate-slide-up rounded-2xl shadow-2xl border px-5 py-3 flex items-center gap-3 text-sm font-medium transition-all duration-300 ${
+                type === 'error' ? 'bg-red-600/90 border-red-500/50 text-white' :
+                type === 'success' ? 'bg-emerald-600/90 border-emerald-500/50 text-white' :
+                'bg-blue-600/90 border-blue-500/50 text-white'
+            }`;
+            toast.style.minWidth = '240px';
+            toast.style.maxWidth = '420px';
+
+            // Icon
+            const icon = document.createElement('span');
+            icon.className = 'flex-shrink-0';
+            if (type === 'error') {
+                icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+            } else if (type === 'success') {
+                icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+            } else {
+                icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+            }
+            toast.appendChild(icon);
+
+            const msg = document.createElement('span');
+            msg.className = 'flex-1';
+            msg.textContent = message;
+            toast.appendChild(msg);
+
+            // Close button
+            const close = document.createElement('button');
+            close.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+            close.className = 'opacity-60 hover:opacity-100 transition-opacity flex-shrink-0';
+            close.onclick = () => dismiss(toast);
+            toast.appendChild(close);
+
+            // Progress bar
+            const barWrapper = document.createElement('div');
+            barWrapper.className = 'absolute bottom-0 left-0 right-0 h-0.5 bg-white/20 rounded-full overflow-hidden';
+            const bar = document.createElement('div');
+            bar.className = 'h-full bg-white/60 rounded-full';
+            bar.style.animation = `toast-progress ${duration}ms linear forwards`;
+            barWrapper.appendChild(bar);
+            toast.appendChild(barWrapper);
+            toast.style.position = 'relative';
+            toast.style.overflow = 'hidden';
+
+            // Hover pause
+            let paused = false;
+            let remaining = duration;
+            let startTime = Date.now();
+            let animStart = Date.now();
+
+            toast.onmouseenter = () => {
+                paused = true;
+                remaining -= (Date.now() - startTime);
+                bar.style.animationPlayState = 'paused';
+            };
+            toast.onmouseleave = () => {
+                paused = false;
+                startTime = Date.now();
+                bar.style.animation = `toast-progress ${remaining}ms linear forwards`;
+                bar.style.animationPlayState = 'running';
+                clearTimeout(toast._timer);
+                toast._timer = setTimeout(() => dismiss(toast), remaining);
+            };
+
+            container.appendChild(toast);
+
+            function dismiss(el) {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(8px)';
+                setTimeout(() => el.remove(), 300);
+            }
+
+            toast._timer = setTimeout(() => dismiss(toast), duration);
+        }
+
+        // ====================================================================
+        //  主題切換
+        // ====================================================================
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('youtube_article_theme', theme);
+            // Update active button styling
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                const isActive = btn.getAttribute('data-theme-btn') === theme;
+                btn.classList.toggle('bg-blue-500', isActive);
+                btn.classList.toggle('text-white', isActive);
+                btn.classList.toggle('bg-transparent', !isActive);
+                btn.classList.toggle('text-slate-400', !isActive);
+            });
+        }
+
+        // ====================================================================
+        //  下載（多格式）
+        // ====================================================================
+        function downloadMarkdown() {
+            if (!currentArticle || !currentTitle) return;
+            const format = document.getElementById('formatSelect').value;
+            const safeName = currentTitle.replace(/[/\\?%*:|"<>]/g, '-').trim();
+
+            let content = currentArticle;
+            let mimeType = 'text/markdown; charset=utf-8';
+            let ext = 'md';
+
+            if (format === 'html') {
+                content = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${safeName}</title><style>body{font-family:-apple-system,system-ui,sans-serif;max-width:720px;margin:40px auto;padding:0 20px;line-height:1.7;color:#333}h1{font-size:2rem}h2{font-size:1.5rem;margin-top:2rem}code{background:#f0f0f0;padding:2px 6px;border-radius:4px}blockquote{border-left:4px solid #ddd;margin:0;padding:0 20px;color:#666}</style></head><body>${marked.parse(currentArticle)}</body></html>`;
+                mimeType = 'text/html; charset=utf-8';
+                ext = 'html';
+            } else if (format === 'txt') {
+                // Strip markdown to plain text
+                const tmp = document.createElement('div');
+                tmp.innerHTML = marked.parse(currentArticle);
+                content = tmp.textContent || tmp.innerText || '';
+                mimeType = 'text/plain; charset=utf-8';
+                ext = 'txt';
+            }
+
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = safeName + '.' + ext;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ====================================================================
+        //  歷史時間分組
+        // ====================================================================
+        function groupHistoryByTime(items) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const thisWeekStart = new Date(today);
+            thisWeekStart.setDate(thisWeekStart.getDate() - today.getDay());
+
+            const groups = { today: [], yesterday: [], thisWeek: [], earlier: [] };
+
+            items.forEach(item => {
+                const d = new Date(item.date);
+                if (d >= today) groups.today.push(item);
+                else if (d >= yesterday) groups.yesterday.push(item);
+                else if (d >= thisWeekStart) groups.thisWeek.push(item);
+                else groups.earlier.push(item);
+            });
+
+            return groups;
+        }
+
+        function getGroupLabel(group, lang) {
+            const labels = {
+                'zh-TW': { today: '今天', yesterday: '昨天', thisWeek: '這週', earlier: '更早' },
+                'zh-CN': { today: '今天', yesterday: '昨天', thisWeek: '本周', earlier: '更早' },
+                'en': { today: 'Today', yesterday: 'Yesterday', thisWeek: 'This Week', earlier: 'Earlier' },
+                'ja': { today: '今日', yesterday: '昨日', thisWeek: '今週', earlier: '以前' }
+            };
+            return (labels[lang] || labels['en'])[group] || group;
+        }
+        let currentArticle = '';
+        let currentTitle = '';
         let conversionResults = [];
+        let currentTabIndex = 0;
 
+        // ====================================================================
+        //  API Key 顯示切換
+        // ====================================================================
+        function toggleApiKey() {
+            const input = document.getElementById('apiKeyInput');
+            const eye = document.getElementById('eyeIcon');
+            const eyeOff = document.getElementById('eyeOffIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                eye.classList.add('hidden');
+                eyeOff.classList.remove('hidden');
+            } else {
+                input.type = 'password';
+                eye.classList.remove('hidden');
+                eyeOff.classList.add('hidden');
+            }
+        }
+
+        // ====================================================================
+        //  URL 解析
+        // ====================================================================
+        function parseUrls(text) {
+            const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/g;
+            const matches = [];
+            let match;
+            while ((match = youtubeRegex.exec(text)) !== null) {
+                matches.push(`https://www.youtube.com/watch?v=${match[1]}`);
+            }
+            return [...new Set(matches)];
+        }
+
+        // ====================================================================
+        //  輸入控制
+        // ====================================================================
+        function clearInput() {
+            const input = document.getElementById('urlInput');
+            if (!input.value) return;
+            const lang = document.getElementById('uiLangSelect').value;
+            const prevValue = input.value;
+            input.value = '';
+            input.focus();
+            showToast(i18n[lang].clearConfirm || '已清空', 'info', 2000);
+        }
+
+        // Enter 快捷鍵
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+                const active = document.activeElement;
+                if (active && active.id === 'urlInput') {
+                    e.preventDefault();
+                    const btn = document.getElementById('convertBtn');
+                    if (!btn.disabled) convert();
+                }
+            }
+        });
+
+        // ====================================================================
+        //  Tab 系統（含鍵盤導航）
+        // ====================================================================
+        function switchResult(index) {
+            const result = conversionResults[index];
+            if (!result) return;
+            currentTabIndex = index;
+
+            showArticle(result.article, result.title);
+
+            const tabs = document.querySelectorAll('.result-tab');
+            tabs.forEach((tab, i) => {
+                const isActive = i === index;
+                tab.classList.toggle('bg-blue-600', isActive);
+                tab.classList.toggle('text-white', isActive);
+                tab.classList.toggle('shadow-lg', isActive);
+                tab.classList.toggle('shadow-blue-900/40', isActive);
+                tab.classList.toggle('bg-slate-800', !isActive);
+                tab.classList.toggle('text-slate-400', !isActive);
+                tab.classList.toggle('hover:bg-slate-700', !isActive);
+                tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                tab.setAttribute('tabindex', isActive ? '0' : '-1');
+            });
+        }
+
+        function onTabKeydown(e, index) {
+            const tabs = document.querySelectorAll('.result-tab');
+            const total = tabs.length;
+            let next = -1;
+
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                next = (index + 1) % total;
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                next = (index - 1 + total) % total;
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                next = 0;
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                next = total - 1;
+            }
+
+            if (next >= 0 && next < total) {
+                switchResult(next);
+                tabs[next].focus();
+            }
+        }
+
+        function renderTabs(results) {
+            const container = document.getElementById('resultTabs');
+            container.innerHTML = '';
+
+            results.forEach((res, i) => {
+                const btn = document.createElement('button');
+                btn.className = `result-tab flex-shrink-0 px-4 py-2 rounded-xl text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1e293b] ${
+                    i === 0 ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                }`;
+                btn.setAttribute('role', 'tab');
+                btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+                btn.setAttribute('tabindex', i === 0 ? '0' : '-1');
+                const shortTitle = res.title.length > 12 ? res.title.substring(0, 12) + '...' : res.title;
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline mr-1.5 -mt-0.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>${shortTitle}`;
+                btn.onclick = () => switchResult(i);
+                btn.onkeydown = (e) => onTabKeydown(e, i);
+                container.appendChild(btn);
+            });
+        }
+
+        // ====================================================================
+        //  Show Article
+        // ====================================================================
+        function showArticle(article, title) {
+            currentArticle = article;
+            currentTitle = title;
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('skeleton').classList.add('hidden');
+            const resultDiv = document.getElementById('result');
+            resultDiv.classList.add('opacity-0');
+            setTimeout(() => {
+                resultDiv.innerHTML = marked.parse(article);
+                resultDiv.classList.remove('opacity-0');
+            }, 100);
+            document.getElementById('resultContainer').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ====================================================================
+        //  下載 / 複製
+        // ====================================================================
+        function downloadMarkdown() {
+            if (!currentArticle || !currentTitle) return;
+            const blob = new Blob([currentArticle], { type: 'text/markdown; charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const safeName = currentTitle.replace(/[/\\?%*:|"<>]/g, '-').trim();
+            a.href = url;
+            a.download = safeName + '.md';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function copyMarkdown() {
+            if (!currentArticle) return;
+            await navigator.clipboard.writeText(currentArticle);
+            const lang = document.getElementById('uiLangSelect').value;
+            const btn = document.getElementById('copyBtn');
+            const origSvg = btn.querySelector('svg').outerHTML;
+            const origSpan = btn.querySelector('span');
+            const origText = origSpan ? origSpan.innerText : '';
+
+            // Visual feedback
+            btn.innerHTML = `${origSvg} <span>${i18n[lang].copied}</span>`;
+            btn.classList.add('bg-emerald-600/20', 'text-emerald-400', 'border-emerald-500/30');
+            btn.classList.remove('bg-blue-600/20', 'text-blue-400', 'border-blue-500/20');
+            btn.style.pointerEvents = 'none';
+
+            setTimeout(() => {
+                btn.innerHTML = `${origSvg} <span data-i18n="copyBtn">${origText}</span>`;
+                btn.classList.remove('bg-emerald-600/20', 'text-emerald-400', 'border-emerald-500/30');
+                btn.classList.add('bg-blue-600/20', 'text-blue-400', 'border-blue-500/20');
+                btn.style.pointerEvents = '';
+            }, 1500);
+
+            showToast(i18n[lang].copySuccess, 'success');
+        }
+
+        // ====================================================================
+        //  歷史紀錄
+        // ====================================================================
+        async function loadHistory() {
+            try {
+                const res = await fetch('/history');
+                const data = await res.json();
+                const list = document.getElementById('historyList');
+                list.innerHTML = '';
+                const lang = document.getElementById('uiLangSelect').value;
+
+                if (!data || !Array.isArray(data) || data.length === 0) {
+                    list.innerHTML = `
+                        <div class="text-center py-12 bg-[#1e293b]/30 rounded-2xl border border-dashed border-slate-700/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-slate-600">
+                                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            <p class="text-slate-500 text-sm">${i18n[lang].noHistory}</p>
+                        </div>`;
+                    return;
+                }
+
+                // Group by time
+                const groups = groupHistoryByTime(data);
+                const ordered = ['today', 'yesterday', 'thisWeek', 'earlier'];
+                const groupLabels = {
+                    today: [], yesterday: [], thisWeek: [], earlier: []
+                };
+
+                ordered.forEach(key => {
+                    if (groups[key].length === 0) return;
+                    const label = getGroupLabel(key, lang);
+                    const groupHeader = document.createElement('div');
+                    groupHeader.className = `text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-4 ${key === 'today' ? 'mt-0' : ''}`;
+                    groupHeader.textContent = label;
+                    list.appendChild(groupHeader);
+
+                    const items = key === 'earlier' ? groups[key].slice(0, 3) : groups[key].slice(0, 5);
+                    items.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'bg-[#1e293b] p-2.5 rounded-xl border border-slate-700 flex gap-3 items-center hover:border-blue-500/50 transition-all cursor-pointer group overflow-hidden';
+                        div.onclick = () => showArticle(item.article, item.title);
+                        div.innerHTML = `
+                            <div class="w-16 h-10 flex-shrink-0 overflow-hidden rounded-lg bg-slate-800 relative">
+                                <img src="${item.thumbnail || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'}"
+                                     referrerpolicy="no-referrer"
+                                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                                <div class="absolute inset-0 hidden items-center justify-center bg-slate-700 text-[9px] text-slate-500">—</div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-white text-base font-medium mb-0.5 truncate group-hover:text-blue-400 transition-all">${item.title}</div>
+                                <div class="text-xs text-slate-500 truncate">${item.date}</div>
+                            </div>
+                            <button onclick="event.stopPropagation(); deleteItem('${item.url}')"
+                                    class="p-2 hover:bg-red-500/15 rounded-lg text-slate-600 hover:text-red-400 transition-all opacity-0 group-hover:opacity-100 flex-shrink-0"
+                                    data-tooltip="刪除">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                            </button>
+                        `;
+                        list.appendChild(div);
+                    });
+                });
+            } catch (e) {
+                console.error('Load history failed:', e);
+            }
+        }
+
+        async function deleteItem(url) {
+            const lang = document.getElementById('uiLangSelect').value;
+            showConfirm(i18n[lang].confirmDelete, async () => {
+                try {
+                    await fetch(`/history?url=${encodeURIComponent(url)}`, { method: 'DELETE' });
+                    await loadHistory();
+                    showToast(i18n[lang].deleteFail || 'Deleted', 'info', 1500);
+                } catch (e) {
+                    showToast(i18n[lang].deleteFail, 'error');
+                }
+            });
+        }
+
+        // ====================================================================
+        //  Confirm Modal
+        // ====================================================================
         function showConfirm(message, onConfirm) {
             const overlay = document.createElement('div');
             overlay.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-[200]';
@@ -370,305 +1074,65 @@
             overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
         }
 
-        function clearInput() {
-            const input = document.getElementById('urlInput');
-            if (!input.value) return;
-            input.value = '';
-            input.focus();
-        }
-
-        function switchResult(index) {
-            const result = conversionResults[index];
-            if (!result) return;
-            
-            showArticle(result.article, result.title);
-            
-            const tabs = document.querySelectorAll('.result-tab');
-            tabs.forEach((tab, i) => {
-                if (i === index) {
-                    tab.classList.remove('bg-slate-800', 'text-slate-400');
-                    tab.classList.add('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-900/40');
-                    tab.setAttribute('aria-selected', 'true');
-                } else {
-                    tab.classList.add('bg-slate-800', 'text-slate-400');
-                    tab.classList.remove('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-900/40');
-                    tab.setAttribute('aria-selected', 'false');
-                }
-            });
-        }
-
-        function renderTabs(results) {
-            const container = document.getElementById('resultTabs');
-            container.innerHTML = '';
-            
-            results.forEach((res, i) => {
-                const btn = document.createElement('button');
-                btn.className = `result-tab flex-shrink-0 px-4 py-2 rounded-xl text-xs font-medium transition-all ${i === 0 ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`;
-                btn.setAttribute('role', 'tab');
-                btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
-                const shortTitle = res.title.length > 12 ? res.title.substring(0, 12) + '...' : res.title;
-                btn.innerText = `📄 ${shortTitle}`;
-                btn.onclick = () => switchResult(i);
-                container.appendChild(btn);
-            });
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                const btn = document.getElementById('convertBtn');
-                if (!btn.disabled) convert();
-            }
-        });
-
-        function parseUrls(text) {
-            const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/g;
-            const matches = [];
-            let match;
-            while ((match = youtubeRegex.exec(text)) !== null) {
-                matches.push(`https://www.youtube.com/watch?v=${match[1]}`);
-            }
-            return [...new Set(matches)];
-        }
-
-        function changeUILanguage() {
-            const lang = document.getElementById('uiLangSelect').value;
-            localStorage.setItem('ui_lang', lang);
-            const t = i18n[lang];
-            
-            document.title = t.title;
-            const headerH1 = document.querySelector('header h1');
-            if (headerH1) {
-                headerH1.innerHTML = lang === 'zh-TW' || lang === 'zh-CN' ? 
-                    `<span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">YouTube</span> ${lang === 'zh-TW' ? '轉文章' : '转文章'}` : 
-                    `<span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">YouTube</span> to Article`;
-            }
-            document.querySelector('header p').innerText = t.subtitle;
-            document.getElementById('apiKeyInput').placeholder = t.apiPlaceholder;
-            document.getElementById('uiLangLabel').innerText = t.uiLangLabel;
-            
-            // 更新 API Key Hint
-            const apiHint = document.querySelector('#apiKeyInput').parentElement.querySelector('.text-slate-500');
-            if (apiHint) apiHint.innerText = t.apiHint;
-
-            // 更新 文章輸出語系 Label
-            const targetLangLabel = document.querySelector('label[class*="text-sm font-semibold text-slate-300"]');
-            // 注意：這裡有兩個 label，需要精確定位第二個
-            const labels = document.querySelectorAll('label.text-sm.font-semibold.text-slate-300');
-            if (labels[1]) labels[1].innerText = t.targetLangLabel;
-            
-            const urlInput = document.getElementById('urlInput');
-            if (urlInput) urlInput.placeholder = t.urlPlaceholder;
-            
-            // 更新 YouTube 連結 Label 與 Hint
-            const urlLabelContainer = document.querySelector('#urlInput').parentElement.querySelector('.flex.items-center.gap-3');
-            if (urlLabelContainer) {
-                const label = urlLabelContainer.querySelector('label');
-                const hint = urlLabelContainer.querySelector('span');
-                if (label) label.innerText = t.urlLabel;
-                if (hint) hint.innerText = t.urlHint;
-            }
-            
-            const convertBtn = document.getElementById('convertBtn');
-            if (convertBtn) convertBtn.innerHTML = `<svg class="group-hover:rotate-12 transition-transform" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> ${t.convertBtn} <span class="text-xs font-normal opacity-50 ml-1">(Ctrl+Enter)</span>`;
-            
-            // 更新 清除輸入按鈕
-            const clearBtn = document.querySelector('button[onclick="clearInput()"]');
-            if (clearBtn) {
-                const btnText = clearBtn.querySelector('span') || clearBtn;
-                // 如果按鈕內有 span 就改 span，否則直接改 innerHTML (保留 SVG)
-                const svg = clearBtn.querySelector('svg').outerHTML;
-                clearBtn.innerHTML = `${svg} ${t.clearBtn}`;
-            }
-            
-            const errorSpan = document.querySelector('#errorDisplay .flex.items-center.gap-2.font-bold.mb-1 span');
-            if (errorSpan) errorSpan.innerText = t.errorTitle;
-            
-            const dlBtn = document.querySelector('button[onclick="downloadMarkdown()"]');
-            if (dlBtn) dlBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> ${t.downloadBtn}`;
-            
-            const cpBtn = document.querySelector('button[onclick="copyMarkdown()"]');
-            if (cpBtn) cpBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> ${t.copyBtn}`;
-            
-            const historySpan = document.querySelector('#historySection h2 span');
-            if (historySpan) historySpan.innerText = t.historyTitle;
-        }
-
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.setAttribute('role', 'alert');
-            toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white text-sm transition-all duration-300 transform translate-y-0 z-[100] ${
-                type === 'error' ? 'bg-red-600' : 'bg-blue-600'
-            }`;
-            toast.innerText = message;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        function showError(messages) {
-            const display = document.getElementById('errorDisplay');
-            const container = document.getElementById('errorMessages');
-            if (!messages || messages.length === 0) {
-                display.classList.add('hidden');
-                return;
-            }
-            container.innerHTML = messages.map(m => `<div>• ${m}</div>`).join('');
-            display.classList.remove('hidden');
-        }
-
-        function hideError() {
-            document.getElementById('errorDisplay').classList.add('hidden');
-        }
-
-        async function loadHistory() {
-            try {
-                const res = await fetch('/history');
-                const data = await res.json();
-                const list = document.getElementById('historyList');
-                list.innerHTML = '';
-                if (!data || !Array.isArray(data) || data.length === 0) {
-                    list.innerHTML = '<p class="text-slate-500 text-center py-8 bg-[#1e293b] rounded-xl border border-slate-700">尚無紀錄</p>';
-                    return;
-                }
-                data.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'bg-[#1e293b] p-2.5 rounded-xl border border-slate-700 flex gap-3 items-center hover:border-blue-500 transition-all cursor-pointer group overflow-hidden';
-                    div.onclick = () => showArticle(item.article, item.title);
-                    div.innerHTML = `
-                        <div class="w-20 h-11 flex-shrink-0 overflow-hidden rounded-lg bg-slate-800 relative">
-                                <img src="${item.thumbnail || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'}" 
-                                     referrerpolicy="no-referrer"
-                                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                                <div class="absolute inset-0 flex items-center justify-center bg-slate-700 text-[10px] text-slate-400" style="display:none">No Image</div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="text-white font-medium mb-1 truncate group-hover:text-blue-400 transition-all overflow-hidden whitespace-nowrap text-ellipsis">${item.title}</div>
-                            <div class="text-xs text-slate-400 truncate overflow-hidden whitespace-nowrap text-ellipsis">${item.date} · ${item.url}</div>
-                        </div>
-                        <div class="flex-shrink-0 ml-2">
-                            <button onclick="event.stopPropagation(); deleteItem('${item.url}')" class="p-2 hover:bg-red-500/20 rounded-lg text-slate-500 hover:text-red-400 transition-all" title="刪除">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                            </button>
-                        </div>
-                    `;
-                    list.appendChild(div);
-                });
-            } catch (e) {
-                console.error('Load history failed:', e);
-            }
-        }
-
-        function showArticle(article, title) {
-            currentArticle = article;
-            currentTitle = title;
-            document.getElementById('emptyState').classList.add('hidden');
-            const resultDiv = document.getElementById('result');
-            resultDiv.classList.add('opacity-0');
-            setTimeout(() => {
-                resultDiv.innerHTML = marked.parse(article);
-                resultDiv.classList.remove('opacity-0');
-            }, 100);
-            document.getElementById('resultContainer').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        async function deleteItem(url) {
-            const lang = document.getElementById('uiLangSelect').value;
-            showConfirm(i18n[lang].confirmDelete, async () => {
-                try {
-                    await fetch(`/history?url=${encodeURIComponent(url)}`, { method: 'DELETE' });
-                    await loadHistory();
-                } catch (e) {
-                    showError([i18n[lang].deleteFail]);
-                }
-            });
-        }
-
-        async function copyMarkdown() {
-            if(!currentArticle) return;
-            await navigator.clipboard.writeText(currentArticle);
-            const lang = document.getElementById('uiLangSelect').value;
-            const btn = document.querySelector('button[onclick="copyMarkdown()"]');
-            const origHtml = btn.innerHTML;
-            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> ' + (lang === 'ja' ? 'コピー完了' : (lang === 'en' ? 'Copied' : '已複製'));
-            btn.classList.add('bg-green-600/20', 'text-green-400', 'border-green-500/30');
-            btn.classList.remove('bg-blue-600/20', 'text-blue-400', 'border-blue-500/20');
-            setTimeout(() => {
-                btn.innerHTML = origHtml;
-                btn.classList.remove('bg-green-600/20', 'text-green-400', 'border-green-500/30');
-                btn.classList.add('bg-blue-600/20', 'text-blue-400', 'border-blue-500/20');
-            }, 1500);
-            showToast(i18n[lang].copySuccess);
-        }
-
-        function downloadMarkdown() {
-            if(!currentArticle || !currentTitle) return;
-            const blob = new Blob([currentArticle], { type: 'text/markdown; charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            const safeName = currentTitle.replace(/[/\\?%*:|"<>]/g, '-').trim();
-            a.href = url;
-            a.download = safeName + '.md';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
+        // ====================================================================
+        //  轉換主邏輯
+        // ====================================================================
         async function convert() {
             const urlInput = document.getElementById('urlInput');
             const apiKeyInput = document.getElementById('apiKeyInput');
             const targetLangSelect = document.getElementById('targetLangSelect');
-            
+
             const validUrls = parseUrls(urlInput.value);
             const apiKey = apiKeyInput.value.trim();
             const targetLang = targetLangSelect.value;
-            
+
             const lang = document.getElementById('uiLangSelect').value;
             const t = i18n[lang];
 
-            hideError();
             if (!apiKey) {
-                showError([t.apiPlaceholder]);
+                showToast(t.apiPlaceholder, 'error');
+                apiKeyInput.focus();
                 return;
             }
-            
+
             if (validUrls.length === 0) {
-                showError([t.parseError]);
+                showToast(t.parseError, 'error');
+                urlInput.focus();
                 return;
             }
 
             localStorage.setItem('gemini_api_key', apiKey);
-            
+
             const btn = document.getElementById('convertBtn');
             const loading = document.getElementById('loading');
+            const skeleton = document.getElementById('skeleton');
             const resultContainer = document.getElementById('resultContainer');
             const loadingText = document.getElementById('loadingText');
             const progressBar = document.getElementById('progressBar');
             const progressPercent = document.getElementById('progressPercent');
-            
+
             btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> <span>${t.converting}</span>`;
             loading.classList.remove('hidden');
-            document.getElementById('emptyState')?.classList.remove('hidden');
+            skeleton.classList.remove('hidden');
             resultContainer.classList.add('hidden');
-            
+            document.getElementById('emptyState').classList.add('hidden');
+
             let progress = 0;
-            const steps = t.loadingSteps;
+            const steps = [t.initQueue, t.extractSubs, t.cleanData, t.aiRewrite];
             let stepIdx = 0;
             const startTime = Date.now();
-            
+
             const progressInterval = setInterval(() => {
                 const elapsed = (Date.now() - startTime) / 1000;
                 if (elapsed < 1.5) progress = 5 + elapsed * 10;
                 else if (elapsed < 4) progress = 20 + (elapsed - 1.5) * 4;
                 else if (elapsed < 12) progress = 30 + (elapsed - 4) * 3.75;
                 else progress = Math.min(85, 60 + (elapsed - 12) * 1.5);
+
                 progressBar.style.width = `${Math.min(progress, 100)}%`;
                 progressPercent.innerText = `${Math.round(Math.min(progress, 100))}%`;
-                
+
                 if (progress > 25 && stepIdx === 0) stepIdx = 1;
                 if (progress > 50 && stepIdx === 1) stepIdx = 2;
                 if (progress > 80 && stepIdx === 2) stepIdx = 3;
@@ -680,57 +1144,75 @@
                 formData.append('urls', validUrls.join('\n'));
                 formData.append('api_key', apiKey);
                 formData.append('target_lang', targetLang);
-                
+
                 const response = await fetch('/convert', { method: 'POST', body: formData });
                 const data = await response.json();
-                
+
                 if (data.error) {
-                    showError([data.error]);
+                    showToast(data.error, 'error');
                 } else {
                     progress = 100;
                     progressBar.style.width = '100%';
                     progressPercent.innerText = '100%';
-                    
+
                     setTimeout(async () => {
                         const results = data.results;
                         const successful = results.filter(r => !r.error);
                         const failed = results.filter(r => r.error);
-                        
+
                         if (successful.length === 0) {
-                            const errorMsgs = failed.map(f => `${f.url} : ${f.error}`);
-                            showError(errorMsgs);
+                            failed.forEach(f => showToast(`${f.url}: ${f.error}`, 'error'));
                         } else {
                             conversionResults = successful;
                             renderTabs(successful);
-                            
+
                             const firstResult = successful[0];
                             currentArticle = firstResult.article;
                             const titleMatch = currentArticle.match(/^#\s+(.*)$/m);
-                            currentTitle = titleMatch ? titleMatch[1] : (firstResult.title || "YouTube 轉文章");
+                            currentTitle = titleMatch ? titleMatch[1] : (firstResult.title || 'YouTube 轉文章');
                             showArticle(currentArticle, currentTitle);
-                            
+
                             if (failed.length > 0) {
-                                const errorMsgs = failed.map(f => `${f.url} : ${f.error}`);
-                                showError(errorMsgs);
+                                failed.forEach(f => showToast(`${f.url}: ${f.error}`, 'error'));
                             }
-                            showToast(t.successBatch);
+                            showToast(t.successBatch, 'success', 3000);
                         }
                         await loadHistory();
                     }, 500);
                 }
             } catch (e) {
-                showError([t.requestFail + e]);
+                showToast(t.requestFail + e.message, 'error');
             } finally {
                 clearInterval(progressInterval);
                 setTimeout(() => {
                     loading.classList.add('hidden');
+                    skeleton.classList.add('hidden');
                     progressBar.style.width = '0%';
                     progressPercent.innerText = '0%';
+                    const origBtnText = t.convertBtn;
+                    btn.innerHTML = `<svg class="group-hover:translate-x-0.5 transition-transform" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> <span data-i18n="convertBtn">${origBtnText}</span> <span class="text-xs font-normal opacity-40 ml-1 hidden sm:inline">(Enter)</span>`;
                 }, 800);
                 btn.disabled = false;
             }
         }
 
+        // ====================================================================
+        //  Back to Top
+        // ====================================================================
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('backToTop');
+            if (window.scrollY > 400) {
+                btn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+                btn.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+            } else {
+                btn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+                btn.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+            }
+        });
+
+        // ====================================================================
+        //  Initialize
+        // ====================================================================
         window.onload = () => {
             const savedKey = localStorage.getItem('gemini_api_key');
             if (savedKey) {
@@ -739,8 +1221,21 @@
             const savedLang = localStorage.getItem('ui_lang');
             if (savedLang) {
                 document.getElementById('uiLangSelect').value = savedLang;
-                changeUILanguage();
+            } else {
+                // 首次訪問：根據瀏覽器語言自動選擇
+                const navLang = navigator.language || navigator.userLanguage || '';
+                let detected = 'en';
+                if (/^zh-HK|^zh-TW|^zh-MO/i.test(navLang)) detected = 'zh-TW';
+                else if (/^zh/i.test(navLang)) detected = 'zh-CN';
+                else if (/^ja/i.test(navLang)) detected = 'ja';
+                document.getElementById('uiLangSelect').value = detected;
+                localStorage.setItem('ui_lang', detected);
             }
+            applyI18n(document.getElementById('uiLangSelect').value);
+
+            // Restore theme
+            const savedTheme = localStorage.getItem('youtube_article_theme') || 'dark';
+            setTheme(savedTheme);
             loadHistory();
         };
     </script>

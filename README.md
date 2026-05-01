@@ -20,9 +20,29 @@ AI-powered tool that transforms YouTube videos into deeply structured articles v
 | Transform | Gemini Flash restructures spoken content into thematic blocks with H1/H2/H3 hierarchy |
 | Output | Markdown — view, copy, or download in-browser |
 | History | Last 50 conversions persisted locally, with delete support |
-| UI | 4 languages (TW, CN, EN, JA), dark theme, custom confirm modal, progress bar, multi-tab results, a11y-optimized |
+| UI | 4 languages (TW, CN, EN, JA), auto-detect browser lang, 2 themes (dark/high-contrast), skeleton loading, unified toasts, tab keyboard nav, sticky header, time-grouped history, a11y-optimized |
 
 ## What's New
+
+**v3.5 (2026-05-02) — Complete UI/UX overhaul**
+
+- **data-i18n attribute system**: Replaced fragile DOM querySelector chain with `data-i18n="key"` — language switching now robust, fast, and scalable.
+- **Unified Toast system**: Removed separate error display div. All notifications (info/success/error) use animated toasts with auto-dismiss progress bar + hover-pause.
+- **SVG icon replacement**: All emoji (📝📜📄🔍📥🧹🤖) replaced with inline SVG icons — consistent rendering across platforms.
+- **Skeleton loading**: Conversion area shows shimmer placeholders instead of blank space during processing.
+- **API key visibility toggle**: Eye icon to show/hide the API key input.
+- **Tab keyboard navigation**: Arrow keys, Home/End for multi-result tab switching with focus ring.
+- **Restructured config card**: API Key, URL input, and language options in clearly separated sections.
+- **Sticky header with mobile language selector**: Language picker moved to a sticky top bar, no longer overlaps content on mobile.
+- **Copy button feedback**: Button turns green with "Copied ✓" for 1.5s after clicking.
+- **Back to top button**: Floating button appears after scrolling 400px.
+- **Loading spinner**: Convert button shows spinning animation + "Converting..." text while processing.
+- **Enter key submission**: Press Enter in URL input to trigger conversion (no Ctrl needed).
+- **Theme system**: 2 themes — Dark (default) and High Contrast. Persisted in localStorage.
+- **Time-grouped history**: History organized as Today / Yesterday / This Week / Earlier.
+- **Auto-detect browser language**: First visit automatically matches UI to `navigator.language`.
+- **Increased base font size**: All text bumped up one size (xs→sm, sm→base, 10px→xs) for better readability.
+- **Download format selector removed**: Simplified to single MD download button.
 
 **v3.4 (2026-05-01) — Resilient metadata extraction & cleanup**
 
