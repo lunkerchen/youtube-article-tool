@@ -66,6 +66,13 @@
         }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes fade-in {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.15s ease-out;
+        }
     </style>
 </head>
 <body class="bg-[#0f172a] text-slate-200 min-h-screen font-sans selection:bg-blue-500/30">
@@ -213,7 +220,6 @@
                 clearBtn: '清除輸入',
                 errorTitle: '發生錯誤或部分轉換失敗',
                 loadingSteps: ["🔍 初始化並行隊列...", "📥 批量提取字幕...", "🧹 並行清洗數據...", "🤖 AI 深度重構文章..."],
-                resultMsg: '文章已生成',
                 downloadBtn: '下載 MD',
                 copyBtn: '複製內容',
                 historyTitle: '📜 最近轉換紀錄',
@@ -221,7 +227,10 @@
                 confirmDelete: '確定要刪除這條紀錄嗎？',
                 deleteFail: '刪除失敗',
                 copySuccess: 'Markdown 已複製到剪貼簿！',
-                requestFail: '請求失敗: '
+                requestFail: '請求失敗: ',
+                clearConfirm: '確定要清除輸入嗎？',
+                parseError: '找不到有效的 YouTube 連結',
+                successBatch: '批次轉換完成！'
             },
             'zh-CN': {
                 title: 'YouTube 转文章工具 v3.2',
@@ -238,7 +247,6 @@
                 clearBtn: '清除输入',
                 errorTitle: '发生错误或部分转换失败',
                 loadingSteps: ["🔍 初始化并行队列...", "📥 批量提取字幕...", "🧹 并行清洗数据...", "🤖 AI 深度重构文章..."],
-                resultMsg: '文章已生成',
                 downloadBtn: '下载 MD',
                 copyBtn: '复制内容',
                 historyTitle: '📜 最近转换记录',
@@ -246,7 +254,10 @@
                 confirmDelete: '确定要删除这条记录吗？',
                 deleteFail: '删除失败',
                 copySuccess: 'Markdown 已复制到剪贴板！',
-                requestFail: '请求失败: '
+                requestFail: '请求失败: ',
+                clearConfirm: '确定要清除输入吗？',
+                parseError: '找不到有效的 YouTube 链接',
+                successBatch: '批次转换完成！'
             },
             'en': {
                 title: 'YouTube to Article v3.2',
@@ -263,7 +274,6 @@
                 clearBtn: 'Clear Input',
                 errorTitle: 'Errors occurred or partial failure',
                 loadingSteps: ["🔍 Initializing parallel queue...", "📥 Batch extracting subtitles...", "🧹 Parallel data cleaning...", "🤖 AI deep restructuring..."],
-                resultMsg: 'Article generated',
                 downloadBtn: 'Download MD',
                 copyBtn: 'Copy Content',
                 historyTitle: '📜 Recent Conversions',
@@ -271,7 +281,10 @@
                 confirmDelete: 'Are you sure you want to delete this record?',
                 deleteFail: 'Delete failed',
                 copySuccess: 'Markdown copied to clipboard!',
-                requestFail: 'Request failed: '
+                requestFail: 'Request failed: ',
+                clearConfirm: 'Clear input?',
+                parseError: 'No valid YouTube links found',
+                successBatch: 'Batch conversion complete!'
             },
             'ja': {
                 title: 'YouTube 記事変換ツール v3.2',
@@ -288,7 +301,6 @@
                 clearBtn: '入力をクリア',
                 errorTitle: 'エラーが発生しました、または一部轉換に失敗しました',
                 loadingSteps: ["🔍 並列キューを初期化中...", "📥 字幕を一括抽出中...", "🧹 データを並列クレンジング中...", "🤖 AIが記事を深く再構成中..."],
-                resultMsg: '記事が生成されました',
                 downloadBtn: 'MD',
                 copyBtn: 'コピー',
                 historyTitle: '📜 最近の轉換履歴',
@@ -296,26 +308,45 @@
                 confirmDelete: 'この記録を削除してもよろしいですか？',
                 deleteFail: '削除に失敗しました',
                 copySuccess: 'Markdownをクリップボードにコピーしました！',
-                requestFail: 'リクエストに失敗しました: '
+                requestFail: 'リクエストに失敗しました: ',
+                clearConfirm: '入力をクリアしますか？',
+                parseError: '有効なYouTubeリンクが見つかりません',
+                successBatch: 'バッチ変換完了！'
             }
         };
 
-        const uiStrings = {
-            clearConfirm: '確定要清除輸入嗎？',
-            parseError: '找不到有效的 YouTube 連結',
-            successBatch: '批次轉換完成！'
-        };
+        // i18n keys clearConfirm / parseError / successBatch are now inside i18n[lang]
 
         let currentArticle = "";
         let currentTitle = "";
         let conversionResults = [];
 
+        function showConfirm(message, onConfirm) {
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-[200]';
+            overlay.innerHTML = `
+                <div class="bg-[#1e293b] p-6 rounded-2xl border border-slate-700 shadow-2xl max-w-sm w-full mx-4 animate-fade-in">
+                    <p class="text-white text-sm mb-6">${message}</p>
+                    <div class="flex justify-end gap-3">
+                        <button id="confirmCancel" class="px-4 py-2 rounded-xl bg-slate-700 text-slate-300 text-sm hover:bg-slate-600 transition-all">取消</button>
+                        <button id="confirmOk" class="px-4 py-2 rounded-xl bg-red-600 text-white text-sm hover:bg-red-500 transition-all">確定</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            document.getElementById('confirmCancel').onclick = () => overlay.remove();
+            document.getElementById('confirmOk').onclick = () => { overlay.remove(); onConfirm(); };
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+        }
+
         function clearInput() {
             const input = document.getElementById('urlInput');
-            if (input.value && confirm(uiStrings.clearConfirm)) {
+            if (!input.value) return;
+            const lang = document.getElementById('uiLangSelect').value;
+            showConfirm(i18n[lang].clearConfirm, () => {
                 input.value = '';
                 input.focus();
-            }
+            });
         }
 
         function switchResult(index) {
@@ -506,13 +537,15 @@
         }
 
         async function deleteItem(url) {
-            if(!confirm('確定要刪除這條紀錄嗎？')) return;
-            try {
-                await fetch(`/history?url=${encodeURIComponent(url)}`, { method: 'DELETE' });
-                await loadHistory();
-            } catch (e) {
-                showError(['刪除失敗']);
-            }
+            const lang = document.getElementById('uiLangSelect').value;
+            showConfirm(i18n[lang].confirmDelete, async () => {
+                try {
+                    await fetch(`/history?url=${encodeURIComponent(url)}`, { method: 'DELETE' });
+                    await loadHistory();
+                } catch (e) {
+                    showError([i18n[lang].deleteFail]);
+                }
+            });
         }
 
         async function copyMarkdown() {
@@ -555,7 +588,7 @@
             }
             
             if (validUrls.length === 0) {
-                showError([uiStrings.parseError]);
+                showError([t.parseError]);
                 return;
             }
 
@@ -575,14 +608,16 @@
             let progress = 0;
             const steps = t.loadingSteps;
             let stepIdx = 0;
+            const startTime = Date.now();
             
             const progressInterval = setInterval(() => {
-                if (progress < 30) progress += Math.random() * 5;
-                else if (progress < 70) progress += Math.random() * 2;
-                else if (progress < 95) progress += Math.random() * 0.5;
-                if (progress > 100) progress = 100;
-                progressBar.style.width = `${progress}%`;
-                progressPercent.innerText = `${Math.round(progress)}%`;
+                const elapsed = (Date.now() - startTime) / 1000;
+                if (elapsed < 1.5) progress = 5 + elapsed * 10;
+                else if (elapsed < 4) progress = 20 + (elapsed - 1.5) * 4;
+                else if (elapsed < 12) progress = 30 + (elapsed - 4) * 3.75;
+                else progress = Math.min(85, 60 + (elapsed - 12) * 1.5);
+                progressBar.style.width = `${Math.min(progress, 100)}%`;
+                progressPercent.innerText = `${Math.round(Math.min(progress, 100))}%`;
                 
                 if (progress > 25 && stepIdx === 0) stepIdx = 1;
                 if (progress > 50 && stepIdx === 1) stepIdx = 2;
@@ -628,7 +663,7 @@
                                 const errorMsgs = failed.map(f => `${f.url} : ${f.error}`);
                                 showError(errorMsgs);
                             }
-                            showToast(uiStrings.successBatch);
+                            showToast(t.successBatch);
                         }
                         await loadHistory();
                     }, 500);
