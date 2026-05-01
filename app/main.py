@@ -43,6 +43,42 @@ def clean_vtt(file_path):
             final_lines.append(cleaned_lines[i])
     return ' '.join(final_lines)
 
+
+def clean_srt(file_path):
+    with open(file_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+    lines = content.split('\n')
+    text_lines = []
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        if line.isdigit():
+            continue
+        if '-->' in line:
+            continue
+        text_lines.append(line)
+    final_lines = []
+    for i in range(len(text_lines)):
+        if i == 0 or text_lines[i] != text_lines[i-1]:
+            final_lines.append(text_lines[i])
+    return ' '.join(final_lines)
+
+
+def clean_json_sub(file_path):
+    import json
+    with open(file_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    text_parts = []
+    for event in data.get('events', []):
+        segs = event.get('segs', [])
+        for seg in segs:
+            text = seg.get('utf8', '')
+            if text.strip():
+                text_parts.append(text.strip())
+    return ' '.join(text_parts)
+
+
 def load_history():
     if os.path.exists(HISTORY_FILE):
         try:
@@ -141,7 +177,7 @@ async def process_single_video(url, api_key, target_lang="中文"):
         subs_cmd = [
             "yt-dlp", "--write-subs", "--write-auto-subs",
             "--sub-langs", ",".join(common_langs),
-            "--skip-download", "--sub-format", "vtt",
+            "--skip-download", "--sub-format", "vtt/srt/json",
             "--output", f"{task_temp}/%(id)s.%(ext)s", url
         ]
         # 不設 check=True；429/部分失敗時檢查是否還有下到的檔案
@@ -154,19 +190,51 @@ async def process_single_video(url, api_key, target_lang="中文"):
             else:
                 print(f"[WARN] 字幕下載警告 (code {result.returncode}): {stderr[:300]}")
 
-        vtt_files = glob.glob(os.path.join(task_temp, "**/*.vtt"), recursive=True)
-        if not vtt_files:
+        # 搜尋所有字幕格式
+        sub_exts = ['*.vtt', '*.srt', '*.json', '*.srv1', '*.srv2', '*.ttml']
+        sub_files = []
+        for ext in sub_exts:
+            sub_files.extend(glob.glob(os.path.join(task_temp, f"**/{ext}"), recursive=True))
+        
+        # 若找不到字幕，以 --sub-langs all 重試一次
+        if not sub_files:
+            print(f"[RETRY] 使用 --sub-langs all 重試: {url}")
+            retry_cmd = [
+                "yt-dlp", "--write-subs", "--write-auto-subs",
+                "--sub-langs", "all",
+                "--skip-download", "--sub-format", "vtt/srt/json",
+                "--output", f"{task_temp}/%(id)s.%(ext)s", url
+            ]
+            subprocess.run(retry_cmd, capture_output=True, timeout=120)
+            sub_files = []
+            for ext in sub_exts:
+                sub_files.extend(glob.glob(os.path.join(task_temp, f"**/{ext}"), recursive=True))
+        
+        if not sub_files:
             return {"url": url, "error": "找不到可用字幕"}
 
-        best_vtt_path = None
+        # 依語言優先級選擇最佳字幕
+        best_sub_path = None
         for lang in common_langs:
-            for f_path in vtt_files:
+            for f_path in sub_files:
                 if lang in os.path.basename(f_path):
-                    best_vtt_path = f_path
+                    best_sub_path = f_path
                     break
-            if best_vtt_path: break
-        best_vtt_path = best_vtt_path or vtt_files[0]
-        text = clean_vtt(best_vtt_path)
+            if best_sub_path: break
+        best_sub_path = best_sub_path or sub_files[0]
+        
+        # 根據格式選擇對應解析器
+        fname = best_sub_path.lower()
+        if fname.endswith('.vtt'):
+            text = clean_vtt(best_sub_path)
+        elif fname.endswith('.srt'):
+            text = clean_srt(best_sub_path)
+        elif fname.endswith('.json'):
+            text = clean_json_sub(best_sub_path)
+        else:
+            # 未知格式，嘗試當作純文字讀取
+            with open(best_sub_path, 'r', encoding='utf-8', errors='replace') as f:
+                text = f.read()
 
         article = await call_llm(text, meta, api_key, target_lang)
         save_history({
