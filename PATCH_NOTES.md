@@ -1,5 +1,15 @@
 # 📝 Patch Notes
 
+## v3.3 (2026-05-01) — Subtitle extraction reliability
+
+### 🐛 Bug Fixes
+- **Fixed BrokenPipeError**: Replaced `subprocess.run(stdout=open(...))` with `capture_output=True` to prevent `[Errno 32] Broken pipe` when yt-dlp outputs large JSON metadata (60K+ chars).
+- **Fixed 429 batch failure**: Added `--ignore-errors` to yt-dlp subtitle download. Previously, a single language returning HTTP 429 caused the entire batch to abort (return code 1, zero subtitle files on disk). Now successful languages proceed regardless of individual failures.
+- **Language priority**: Moved `en` to the front of `common_langs` — most videos are in English, and having `en` first ensures the original subtitle track is matched before auto-translated ones, minimizing the risk of 429-triggered failures.
+- **Meta fetch error handling**: `--dump-json` subprocess now returns a proper error message instead of an unhandled exception when metadata extraction fails.
+
+---
+
 ## v3.2 (2026-04-30)
 
 ### 🎨 UI/UX Optimizations

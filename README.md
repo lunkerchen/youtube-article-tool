@@ -24,6 +24,12 @@ AI-powered tool that transforms YouTube videos into deeply structured articles v
 
 ## What's New
 
+**v3.3 (2026-05-01) — Subtitle extraction reliability**
+
+- **Fixed BrokenPipeError**: Replaced `subprocess.run(stdout=open(...))` with `capture_output=True` to prevent `[Errno 32] Broken pipe` when yt-dlp outputs large JSON metadata.
+- **Fixed 429 batch failure**: Added `--ignore-errors` to yt-dlp subtitle download. Previously, a single language returning HTTP 429 caused the entire batch to abort (return code 1, zero files on disk). Now successful languages proceed regardless.
+- **Language priority**: Moved `en` to the front of the priority list — most videos are in English, and having `en` first minimizes the risk of auto-translated subtitle failures.
+
 **v3.2+ (Post-release improvements)**
 
 - **Subtitle format expansion**: Added SRT and JSON subtitle parsers alongside VTT. Automatically retries with `--sub-langs all` if the priority list fails.

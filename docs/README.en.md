@@ -73,7 +73,15 @@ The conversion process is straightforward — 4 steps:
 
 ## 📝 Patch Notes
 
-### v3.3 — UX Polish & Subtitle Format Expansion
+### v3.3 (2026-05-01) — Subtitle extraction reliability
+
+**🐛 Bug Fixes**
+- **Fixed BrokenPipeError**: Replaced `subprocess.run(stdout=open(...))` with `capture_output=True` to prevent `[Errno 32] Broken pipe` when yt-dlp outputs large JSON metadata (60K+ chars).
+- **Fixed 429 batch failure**: Added `--ignore-errors` to yt-dlp subtitle download. Previously, a single language returning HTTP 429 caused the entire batch to abort (return code 1, zero subtitle files on disk). Now successful languages proceed regardless.
+- **Language priority**: Moved `en` to the front of `common_langs` — most videos are in English, having `en` first matches original subtitle tracks before auto-translated ones.
+- **Meta fetch error handling**: `--dump-json` subprocess now returns a proper error message instead of an unhandled exception.
+
+### v3.2+ — Post-release UI/UX improvements
 
 - **Subtitle Format Expansion**: Added support for SRT and JSON subtitle formats alongside the existing VTT format. The extraction pipeline now tries all three formats when searching for subtitles, greatly increasing compatibility with videos that only offer specific subtitle formats.
 - **Automatic Fallback to All Languages**: When the configured priority language list fails to produce subtitles for a video, the system automatically retries with `--sub-langs all` to capture any subtitle track in any language.
@@ -157,6 +165,14 @@ youtube-article-tool/
 
 - **Long Videos**: For videos longer than ~1 hour, the tool includes built-in **Map-Reduce chunking** support to break the content into manageable segments before synthesis. This helps avoid AI context window limits.
 
-- **Rate Limiting (429 Errors)**: YouTube may throttle high-frequency subtitle requests. If you encounter 429 errors, wait a moment and retry. Consider spacing out batch conversions.
+- **Rate Limiting (429 Errors During Subtitle Extraction)**:
+
+  429 is the single most common source of errors in this tool. Understanding the mechanism helps fast diagnosis:
+
+  - **The problem**: YouTube throttles high-frequency subtitle requests with `429 Too Many Requests`.
+  - **yt-dlp's default behavior**: When *any single language* in the request returns 429, yt-dlp **aborts the entire batch** (return code 1, zero files written). This is yt-dlp's design, not a bug.
+  - **How the tool handles it**: The subtitle download command includes `--ignore-errors` (v3.3+), allowing successful languages to proceed regardless of individual failures.
+  - **`[Errno 32] Broken pipe` explained**: This error is usually *not* a real pipe issue. It's a side effect of the 429 batch failure — subsequent code tries to operate on subtitle files that were never written. Upgrading to v3.3 resolves this.
+  - **If it persists**: Wait a few minutes and retry, or reduce concurrent batch size.
 
 - **Browser Cache**: After updating the tool (especially the frontend), use `Cmd/Cmd+Shift+R` (macOS) or `Ctrl+Shift+R` (Windows/Linux) to force a hard refresh and clear stale cached assets.
