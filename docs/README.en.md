@@ -26,30 +26,6 @@ An AI-powered tool that transforms YouTube video content into deeply structured 
 
 ---
 
-## Obsidian Export
-
-Export all converted articles to your Obsidian vault in one command:
-
-```bash
-python3 scripts/export-obsidian.py
-```
-
-**Output directory:**
-```
-~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Laban/YouTube-Articles/
-```
-
-**Each article includes:**
-- YAML frontmatter: `title` (original video title), `source` (YouTube URL), `date` (conversion timestamp)
-- Full Markdown body (H1-H3, lists, bold — all formatting preserved)
-- Sanitized filename (special chars removed), ready to browse, link, and tag in Obsidian
-
-**Notes:**
-- Existing files are overwritten with the latest version from `history.json`
-- Legacy files not in history.json are left untouched — clean up manually if needed
-
----
-
 ## 🚀 Quick Start
 
 ### 1. Prerequisites
@@ -173,8 +149,6 @@ youtube-article-tool/
 │   ├── README.zh-Hant.md    # Traditional Chinese documentation
 │   ├── README.zh-Hans.md    # Simplified Chinese documentation
 │   └── README.ja.md         # Japanese documentation
-├── scripts/
-│   └── export-obsidian.py   # Sync history to Obsidian vault
 ├── start.sh                 # Quick server startup script
 ├── PATCH_NOTES.md           # Detailed version history
 └── README.md                # Root project overview (links to language-specific docs)
