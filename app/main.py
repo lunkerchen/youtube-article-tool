@@ -165,26 +165,35 @@ async def delete_history(url: str):
 async def process_single_video(url, api_key, target_lang="中文"):
     try:
         meta_file = os.path.join(TEMP_DIR, f"meta_{os.urandom(4).hex()}.json")
-        subprocess.run(["yt-dlp", "--dump-json", "--skip-download", url], 
-                      stdout=open(meta_file, 'w'), check=True, timeout=30)
+        # 改用 capture_output=True 避免 file handle 直接傳給 subprocess 導致的 Broken pipe
+        meta_result = subprocess.run(
+            ["yt-dlp", "--dump-json", "--skip-download", url],
+            capture_output=True, timeout=30
+        )
+        if meta_result.returncode != 0:
+            err = meta_result.stderr.decode('utf-8', errors='replace')[:300]
+            return {"url": url, "error": f"無法取得影片資訊: {err}"}
+        with open(meta_file, 'w', encoding='utf-8') as f:
+            f.write(meta_result.stdout.decode('utf-8'))
         with open(meta_file, 'r') as f:
             meta = json.load(f)
 
-        common_langs = ["zh", "zh-TW", "zh-HK", "zh-CN", "zh-Hans", "zh-Hant", "en", "ja", "ko"]
+        # en 放最前面：多數影片是英文，避免自動翻譯語系觸發 429 而整批失敗
+        common_langs = ["en", "zh", "zh-TW", "zh-HK", "zh-CN", "zh-Hans", "zh-Hant", "ja", "ko"]
         task_temp = os.path.join(TEMP_DIR, os.urandom(4).hex())
         os.makedirs(task_temp, exist_ok=True)
         
+        # 加上 --ignore-errors：單一語系 429 不影響其他語系的下載
         subs_cmd = [
             "yt-dlp", "--write-subs", "--write-auto-subs",
             "--sub-langs", ",".join(common_langs),
             "--skip-download", "--sub-format", "vtt/srt/json",
+            "--ignore-errors",
             "--output", f"{task_temp}/%(id)s.%(ext)s", url
         ]
-        # 不設 check=True；429/部分失敗時檢查是否還有下到的檔案
         result = subprocess.run(subs_cmd, capture_output=True, timeout=120)
         if result.returncode != 0:
             stderr = result.stderr.decode('utf-8', errors='replace')
-            # 429 或網路問題只算警告，繼續嘗試用已下載的字幕
             if '429' in stderr or 'Too Many Requests' in stderr:
                 print(f"[WARN] 速率限制，部分字幕可能無法使用: {url}")
             else:
@@ -203,6 +212,7 @@ async def process_single_video(url, api_key, target_lang="中文"):
                 "yt-dlp", "--write-subs", "--write-auto-subs",
                 "--sub-langs", "all",
                 "--skip-download", "--sub-format", "vtt/srt/json",
+                "--ignore-errors",
                 "--output", f"{task_temp}/%(id)s.%(ext)s", url
             ]
             subprocess.run(retry_cmd, capture_output=True, timeout=120)
