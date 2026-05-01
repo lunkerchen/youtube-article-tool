@@ -73,6 +73,26 @@ The conversion process is straightforward — 4 steps:
 
 ## 📝 Patch Notes
 
+### v3.5 (2026-05-02) — Complete UI/UX overhaul
+
+**🎨 UI/UX**
+- **data-i18n attribute system**: Replaced fragile DOM querySelector chain with `data-i18n="key"` — language switching now robust, fast, and scalable.
+- **Unified Toast system**: Removed separate error display. All notifications use animated toasts with auto-dismiss progress bar + hover-pause.
+- **SVG icon replacement**: All emoji replaced with inline SVG icons for consistent rendering across platforms.
+- **Skeleton loading**: Shimmer placeholders during processing instead of blank space.
+- **API key visibility toggle**: Eye icon to show/hide API key input.
+- **Tab keyboard navigation**: Arrow keys + Home/End for multi-result switching with focus ring.
+- **Restructured config card**: Clear separation between API Key, URL input, and language settings.
+- **Sticky header**: Language picker moved to sticky top bar — no mobile overlap.
+- **Copy button feedback**: Button turns green with "Copied ✓" for 1.5s.
+- **Back to top button**: Floating button appears after scrolling 400px.
+- **Loading spinner**: Convert button shows spinner + "Converting..." while processing.
+- **Enter key submission**: Press Enter in URL input to convert.
+- **Theme system**: 2 themes — Dark (default) and High Contrast. Persisted in localStorage.
+- **Time-grouped history**: Today / Yesterday / This Week / Earlier.
+- **Auto-detect browser language**: First visit matches UI to `navigator.language`.
+- **Increased base font size**: All text bumped up one size for readability.
+
 ### v3.4 (2026-05-01) — Resilient metadata extraction & cleanup
 
 **🐛 Bug Fixes**
