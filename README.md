@@ -24,6 +24,12 @@ AI-powered tool that transforms YouTube videos into deeply structured articles v
 
 ## What's New
 
+**v3.4 (2026-05-01) — Resilient metadata extraction & cleanup**
+
+- **Added retry for BrokenPipeError**: `--dump-json` now has 3-attempt auto-retry with progressive backoff. Intermittent pipe breaks during large metadata downloads (118KB+) self-heal instead of failing.
+- **Guaranteed temp file cleanup**: Moved cleanup into a `finally` block — no more leaked temp files on exceptions.
+- **Memory-efficient meta handling**: Direct `json.loads()` on captured stdout instead of write-then-read-back.
+
 **v3.3 (2026-05-01) — Subtitle extraction reliability**
 
 - **Fixed BrokenPipeError**: Replaced `subprocess.run(stdout=open(...))` with `capture_output=True` to prevent `[Errno 32] Broken pipe` when yt-dlp outputs large JSON metadata.

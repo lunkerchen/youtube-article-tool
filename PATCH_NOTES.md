@@ -1,5 +1,14 @@
 # 📝 Patch Notes
 
+## v3.4 (2026-05-01) — Resilient metadata extraction & cleanup
+
+### 🐛 Bug Fixes
+- **Added retry for BrokenPipeError**: Extracted `--dump-json` into `get_video_meta()` with 3-attempt auto-retry and progressive backoff. Previously, intermittent pipe breaks during large JSON metadata downloads (118KB+ for long videos) could fail the entire conversion. Now self-healing with 1s/2s/3s backoff.
+- **Guaranteed temp file cleanup**: Moved `task_temp` and `meta_file` cleanup into a `finally` block. Even if a conversion task throws an exception, temporary files are reliably removed instead of leaking on disk.
+- **Memory-efficient meta handling**: Replaced the write-then-read-back pattern (`stdout.decode()` → file write → `json.load()`) with direct `json.loads()` on captured stdout, reducing I/O and eliminating a decode round-trip.
+
+---
+
 ## v3.3 (2026-05-01) — Subtitle extraction reliability
 
 ### 🐛 Bug Fixes

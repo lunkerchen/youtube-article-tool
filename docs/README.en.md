@@ -73,6 +73,15 @@ The conversion process is straightforward — 4 steps:
 
 ## 📝 Patch Notes
 
+### v3.4 (2026-05-01) — Resilient metadata extraction & cleanup
+
+**🐛 Bug Fixes**
+- **Added retry for BrokenPipeError**: Extracted `--dump-json` into `get_video_meta()` with 3-attempt auto-retry and progressive backoff (1s/2s/3s). Previously, intermittent pipe breaks during large JSON metadata downloads (118KB+ for long videos) could fail the entire conversion. Now self-healing.
+- **Guaranteed temp file cleanup**: Moved `task_temp` and `meta_file` cleanup into a `finally` block — no more leaked temp files on exceptions.
+- **Memory-efficient meta handling**: Replaced write-then-read-back (`stdout.decode()` → file write → `json.load()`) with direct `json.loads()` on captured stdout, eliminating one I/O round-trip.
+
+---
+
 ### v3.3 (2026-05-01) — Subtitle extraction reliability
 
 **🐛 Bug Fixes**
@@ -172,7 +181,7 @@ youtube-article-tool/
   - **The problem**: YouTube throttles high-frequency subtitle requests with `429 Too Many Requests`.
   - **yt-dlp's default behavior**: When *any single language* in the request returns 429, yt-dlp **aborts the entire batch** (return code 1, zero files written). This is yt-dlp's design, not a bug.
   - **How the tool handles it**: The subtitle download command includes `--ignore-errors` (v3.3+), allowing successful languages to proceed regardless of individual failures.
-  - **`[Errno 32] Broken pipe` explained**: This error is usually *not* a real pipe issue. It's a side effect of the 429 batch failure — subsequent code tries to operate on subtitle files that were never written. Upgrading to v3.3 resolves this.
+- **`[Errno 32] Broken pipe` during metadata extraction**: This error can occur when `yt-dlp --dump-json` outputs very large metadata (118KB+ for long videos with extensive format/thumbnail data). v3.4 introduces a dedicated `get_video_meta()` function with 3-attempt auto-retry and backoff, so intermittent pipe breaks self-heal instead of failing the conversion.
   - **If it persists**: Wait a few minutes and retry, or reduce concurrent batch size.
 
 - **Browser Cache**: After updating the tool (especially the frontend), use `Cmd/Cmd+Shift+R` (macOS) or `Ctrl+Shift+R` (Windows/Linux) to force a hard refresh and clear stale cached assets.
