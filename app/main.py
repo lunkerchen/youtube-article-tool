@@ -27,7 +27,6 @@ def get_api_key():
     # 嘗試從環境變量獲取
     return os.getenv("GEMINI_API_KEY", "YOUR_GEMINI_API_KEY_HERE") 
 
-LLM_API_KEY = get_api_key()
 
 def clean_vtt(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -190,7 +189,7 @@ async def convert_videos(urls: str = Form(...), api_key: Optional[str] = Form(No
     if not url_list: return {"error": "請輸入至少一個有效的 YouTube 連結"}
     
     # 優先使用前端傳入的 API Key，若無則嘗試使用環境變量
-    effective_api_key = api_key or LLM_API_KEY
+    effective_api_key = api_key or get_api_key()
     if not effective_api_key or effective_api_key == "YOUR_GEMINI_API_KEY_HERE":
         return {"error": "請提供有效的 Gemini API Key"}
     
