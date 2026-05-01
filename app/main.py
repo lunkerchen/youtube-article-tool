@@ -8,6 +8,7 @@ import httpx
 import asyncio
 import glob
 import shutil
+import time
 from datetime import datetime
 from typing import Optional
 
@@ -66,7 +67,6 @@ def clean_srt(file_path):
 
 
 def clean_json_sub(file_path):
-    import json
     with open(file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     text_parts = []
@@ -162,28 +162,46 @@ async def delete_history(url: str):
     except Exception as e:
         return {"error": str(e)}
 
-async def get_video_meta(url, retries=2):
-    """取得影片元數據，含 BrokenPipeError 重試機制"""
+def run_with_retry(cmd, retries=2, timeout=120):
+    """執行 subprocess.run，含 BrokenPipeError 自動重試"""
     last_err = None
     for attempt in range(retries + 1):
         try:
-            meta_result = subprocess.run(
-                ["yt-dlp", "--dump-json", "--skip-download", url],
-                capture_output=True, timeout=30
-            )
-            if meta_result.returncode != 0:
-                err = meta_result.stderr.decode('utf-8', errors='replace')[:300]
-                return None, f"無法取得影片資訊: {err}"
-            return json.loads(meta_result.stdout.decode('utf-8')), None
+            result = subprocess.run(cmd, capture_output=True, timeout=timeout)
+            return result, None
         except BrokenPipeError as e:
             last_err = f"BrokenPipeError (try {attempt+1}/{retries+1}): {e}"
-            print(f"[WARN] {last_err} — retrying...")
-            await asyncio.sleep(1 * (attempt + 1))  # 遞增延遲
+            print(f"[WARN] {last_err}")
+            if attempt < retries:
+                time.sleep(1 * (attempt + 1))
         except subprocess.TimeoutExpired:
-            return None, "yt-dlp 逾時 (30s)，可能是影片資訊過大或連線不穩"
+            return None, "subprocess 逾時"
         except Exception as e:
-            return None, f"取得影片資訊失敗: {e}"
-    return None, last_err or "無法取得影片資訊（重試耗盡）"
+            return None, str(e)
+    return None, last_err
+
+
+async def get_video_meta(url, retries=2):
+    """取得影片元數據，含 BrokenPipeError 重試機制"""
+    for attempt in range(retries + 1):
+        result, err = run_with_retry(
+            ["yt-dlp", "--dump-json", "--skip-download", url],
+            retries=0, timeout=30  # 外層已經有 retry loop
+        )
+        if err:
+            if attempt < retries:
+                print(f"[WARN] get_video_meta try {attempt+1}/{retries+1} failed: {err}")
+                await asyncio.sleep(1 * (attempt + 1))
+                continue
+            return None, f"無法取得影片資訊: {err}"
+        if result.returncode != 0:
+            stderr = result.stderr.decode('utf-8', errors='replace')[:300]
+            return None, f"無法取得影片資訊: {stderr}"
+        try:
+            return json.loads(result.stdout.decode('utf-8')), None
+        except json.JSONDecodeError as e:
+            return None, f"解析影片元數據失敗: {e}"
+    return None, "無法取得影片資訊（重試耗盡）"
 
 async def process_single_video(url, api_key, target_lang="中文"):
     meta_file = None
@@ -211,8 +229,10 @@ async def process_single_video(url, api_key, target_lang="中文"):
             "--ignore-errors",
             "--output", f"{task_temp}/%(id)s.%(ext)s", url
         ]
-        result = subprocess.run(subs_cmd, capture_output=True, timeout=120)
-        if result.returncode != 0:
+        result, subs_err = run_with_retry(subs_cmd, timeout=120)
+        if subs_err:
+            print(f"[WARN] 字幕下載失敗: {url} — {subs_err}")
+        elif result and result.returncode != 0:
             stderr = result.stderr.decode('utf-8', errors='replace')
             if '429' in stderr or 'Too Many Requests' in stderr:
                 print(f"[WARN] 速率限制，部分字幕可能無法使用: {url}")
@@ -235,7 +255,7 @@ async def process_single_video(url, api_key, target_lang="中文"):
                 "--ignore-errors",
                 "--output", f"{task_temp}/%(id)s.%(ext)s", url
             ]
-            subprocess.run(retry_cmd, capture_output=True, timeout=120)
+            run_with_retry(retry_cmd, timeout=120)
             sub_files = []
             for ext in sub_exts:
                 sub_files.extend(glob.glob(os.path.join(task_temp, f"**/{ext}"), recursive=True))
