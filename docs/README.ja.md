@@ -262,4 +262,6 @@ youtube-article-tool/
 
 ---
 
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/lunker)
+
 *Made with ❤️ by AI — 知識を動画から解放しよう*

@@ -176,3 +176,7 @@ youtube-article-tool/
   - **If it persists**: Wait a few minutes and retry, or reduce concurrent batch size.
 
 - **Browser Cache**: After updating the tool (especially the frontend), use `Cmd/Cmd+Shift+R` (macOS) or `Ctrl+Shift+R` (Windows/Linux) to force a hard refresh and clear stale cached assets.
+
+---
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/lunker)

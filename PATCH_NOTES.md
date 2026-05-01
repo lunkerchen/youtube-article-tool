@@ -30,6 +30,8 @@
 
 ---
 
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/lunker)
+
 ## v3.1
 - Added support for Simplified Chinese UI.
 - Improved "Copy Markdown" UX by replacing the error display with a non-intrusive Toast notification.

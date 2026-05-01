@@ -53,4 +53,6 @@ bash start.sh
 
 ---
 
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/lunker)
+
 [English](./docs/README.en.md) | [繁體中文](./docs/README.zh-Hant.md) | [简体中文](./docs/README.zh-Hans.md) | [日本語](./docs/README.ja.md)
