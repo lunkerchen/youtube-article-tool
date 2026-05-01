@@ -136,6 +136,8 @@ http://127.0.0.1:8080
 - **BrokenPipeError 自動重試**：將 `--dump-json` 提取獨立為 `get_video_meta()` 函數，具備 3 次自動重試機制（1s/2s/3s 遞增間隔）。先前長影片（118KB+ 元數據）的間歇性 pipe 中斷會導致整次轉換失敗，現在會自動恢復。
 - **暫存檔保證清理**：`task_temp` 與 `meta_file` 清理移至 `finally` 區塊。即使例外發生，臨時檔案也會可靠移除，不再殘留於磁碟。
 - **記憶體效率優化**：將寫檔再讀回的冗餘流程（`stdout.decode()` → 寫檔 → `json.load()`）改為直接 `json.loads()` 處理捕獲的 stdout，減少 I/O 與解碼往返。
+- **統一 `run_with_retry()`**：將所有 `subprocess.run` 呼叫重構為統一的 `run_with_retry()` 包裝器，具備自動 BrokenPipeError 重試（3 次、線性 backoff）。先前只有 `--dump-json` 有 retry 保護，現在字幕下載（含 `--sub-langs all` 重試）也具備 pipe 中斷自癒能力。
+- **移除最後一次嘗試的浪費 sleep**：最終失敗後不再多等 3 秒。
 
 ---
 

@@ -79,6 +79,8 @@ The conversion process is straightforward — 4 steps:
 - **Added retry for BrokenPipeError**: Extracted `--dump-json` into `get_video_meta()` with 3-attempt auto-retry and progressive backoff (1s/2s/3s). Previously, intermittent pipe breaks during large JSON metadata downloads (118KB+ for long videos) could fail the entire conversion. Now self-healing.
 - **Guaranteed temp file cleanup**: Moved `task_temp` and `meta_file` cleanup into a `finally` block — no more leaked temp files on exceptions.
 - **Memory-efficient meta handling**: Replaced write-then-read-back (`stdout.decode()` → file write → `json.load()`) with direct `json.loads()` on captured stdout, eliminating one I/O round-trip.
+- **Unified `run_with_retry()`**: Refactored all `subprocess.run` calls into a single `run_with_retry()` wrapper with automatic BrokenPipeError retry (3 attempts, linear backoff). Previously only `--dump-json` had retry protection; now subtitle downloads (including `--sub-langs all`) also self-heal on pipe breaks.
+- **Removed wasted sleep on last retry**: `get_video_meta()` no longer sleep-waits after the final failed attempt, saving 3 seconds on each terminal failure.
 
 ---
 

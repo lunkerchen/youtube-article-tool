@@ -29,6 +29,8 @@ AI-powered tool that transforms YouTube videos into deeply structured articles v
 - **Added retry for BrokenPipeError**: `--dump-json` now has 3-attempt auto-retry with progressive backoff. Intermittent pipe breaks during large metadata downloads (118KB+) self-heal instead of failing.
 - **Guaranteed temp file cleanup**: Moved cleanup into a `finally` block — no more leaked temp files on exceptions.
 - **Memory-efficient meta handling**: Direct `json.loads()` on captured stdout instead of write-then-read-back.
+- **Unified `run_with_retry()`**: All `subprocess.run` calls now go through a single retry wrapper — subtitle downloads also self-heal on pipe breaks.
+- **Wasted sleep removed**: No more 3-second delay on terminal failures.
 
 **v3.3 (2026-05-01) — Subtitle extraction reliability**
 
