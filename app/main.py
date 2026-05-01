@@ -14,70 +14,78 @@ from typing import Optional
 
 app = FastAPI()
 
-# 配置目錄
+# ── 目錄 ──
 BASE_DIR = "/Users/lunker/youtube-article-tool"
 TEMP_DIR = os.path.join(BASE_DIR, "temp")
 HISTORY_FILE = os.path.join(BASE_DIR, "data", "history.json")
 os.makedirs(TEMP_DIR, exist_ok=True)
 os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
 
-# API 配置
+# ── API ──
 LLM_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent"
 
+# ── 常數 ──
+SUBS_LANG_PRIORITY = ["en", "zh", "zh-TW", "zh-HK", "zh-CN", "zh-Hans", "zh-Hant", "ja", "ko"]
+SUBS_FILE_GLOBS = ['*.vtt', '*.srt', '*.json', '*.srv1', '*.srv2', '*.ttml']
+YTDLP_BASE = ["yt-dlp", "--skip-download"]
+YTDLP_SUBS = YTDLP_BASE + ["--write-subs", "--write-auto-subs", "--sub-format", "vtt/srt/json", "--ignore-errors"]
+
+
 def get_api_key():
-    # 嘗試從環境變量獲取
-    return os.getenv("GEMINI_API_KEY", "YOUR_GEMINI_API_KEY_HERE") 
+    return os.getenv("GEMINI_API_KEY", "YOUR_GEMINI_API_KEY_HERE")
+
+
+# ══════════════════════════════════════════
+# 字幕清洗
+# ══════════════════════════════════════════
+
+def _dedup_consecutive(lines):
+    """相鄰相同行只保留第一行"""
+    result = []
+    for i, line in enumerate(lines):
+        if i == 0 or line != lines[i - 1]:
+            result.append(line)
+    return ' '.join(result)
 
 
 def clean_vtt(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-    cleaned_lines = []
-    for line in lines:
+        raw = f.readlines()
+    cleaned = []
+    for line in raw:
         if 'WEBVTT' in line or '--> ' in line or not line.strip():
             continue
-        line = re.sub(r'<[^>]+>', '', line)
-        cleaned_lines.append(line.strip())
-    final_lines = []
-    for i in range(len(cleaned_lines)):
-        if i == 0 or cleaned_lines[i] != cleaned_lines[i-1]:
-            final_lines.append(cleaned_lines[i])
-    return ' '.join(final_lines)
+        cleaned.append(re.sub(r'<[^>]+>', '', line).strip())
+    return _dedup_consecutive(cleaned)
 
 
 def clean_srt(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
-    lines = content.split('\n')
     text_lines = []
-    for line in lines:
+    for line in content.split('\n'):
         line = line.strip()
-        if not line:
-            continue
-        if line.isdigit():
-            continue
-        if '-->' in line:
+        if not line or line.isdigit() or '-->' in line:
             continue
         text_lines.append(line)
-    final_lines = []
-    for i in range(len(text_lines)):
-        if i == 0 or text_lines[i] != text_lines[i-1]:
-            final_lines.append(text_lines[i])
-    return ' '.join(final_lines)
+    return _dedup_consecutive(text_lines)
 
 
 def clean_json_sub(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
-    text_parts = []
+    parts = []
     for event in data.get('events', []):
-        segs = event.get('segs', [])
-        for seg in segs:
+        for seg in event.get('segs', []):
             text = seg.get('utf8', '')
             if text.strip():
-                text_parts.append(text.strip())
-    return ' '.join(text_parts)
+                parts.append(text.strip())
+    return ' '.join(parts)
 
+
+# ══════════════════════════════════════════
+# 歷史紀錄
+# ══════════════════════════════════════════
 
 def load_history():
     if os.path.exists(HISTORY_FILE):
@@ -87,6 +95,7 @@ def load_history():
         except:
             return []
     return []
+
 
 def save_history(item):
     try:
@@ -99,24 +108,30 @@ def save_history(item):
     except Exception as e:
         print(f"Save history failed: {e}")
 
+
 def delete_history_item(url):
     history = load_history()
-    new_history = [h for h in history if h['url'] != url]
     with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
-        json.dump(new_history, f, ensure_ascii=False, indent=2)
+        json.dump([h for h in history if h['url'] != url], f, ensure_ascii=False, indent=2)
+
+
+# ══════════════════════════════════════════
+# 縮圖
+# ══════════════════════════════════════════
 
 def get_best_thumbnail(meta):
-    # 優先從 yt-dlp 提取的 thumbnails 列表中找最高解析度的
     thumbnails = meta.get("thumbnails", [])
     if thumbnails:
-        # thumbnails 列表通常由低到高排序，取最後一個
         return thumbnails[-1].get("url", "")
-    
-    # 備用方案：使用 YouTube 預設 URL
     video_id = meta.get("id")
-    if not video_id: return ""
-    # hqdefault 幾乎所有影片都有，比 maxresdefault 穩定得多
+    if not video_id:
+        return ""
     return f"https://img.youtube.com/vi/{video_id}/sddefault.jpg"
+
+
+# ══════════════════════════════════════════
+# LLM
+# ══════════════════════════════════════════
 
 async def call_llm(text, meta, api_key, target_lang="中文"):
     prompt = f"""
@@ -145,48 +160,39 @@ async def call_llm(text, meta, api_key, target_lang="中文"):
         except:
             return f"AI 生成失敗: {json.dumps(res_json)}"
 
-@app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
-    with open(os.path.join(BASE_DIR, "app", "templates", "index.html"), "r", encoding="utf-8") as f:
-        return f.read()
 
-@app.get("/history")
-async def get_history():
-    return load_history()
-
-@app.delete("/history")
-async def delete_history(url: str):
-    try:
-        delete_history_item(url)
-        return {"status": "success"}
-    except Exception as e:
-        return {"error": str(e)}
+# ══════════════════════════════════════════
+# subprocess 通用
+# ══════════════════════════════════════════
 
 def run_with_retry(cmd, retries=2, timeout=120):
     """執行 subprocess.run，含 BrokenPipeError 自動重試"""
-    last_err = None
     for attempt in range(retries + 1):
         try:
             result = subprocess.run(cmd, capture_output=True, timeout=timeout)
             return result, None
         except BrokenPipeError as e:
-            last_err = f"BrokenPipeError (try {attempt+1}/{retries+1}): {e}"
-            print(f"[WARN] {last_err}")
+            msg = f"BrokenPipeError (try {attempt+1}/{retries+1}): {e}"
+            print(f"[WARN] {msg}")
             if attempt < retries:
                 time.sleep(1 * (attempt + 1))
         except subprocess.TimeoutExpired:
             return None, "subprocess 逾時"
         except Exception as e:
             return None, str(e)
-    return None, last_err
+    return None, msg  # noqa: msg is always set if we reach here
 
+
+# ══════════════════════════════════════════
+# 影片處理
+# ══════════════════════════════════════════
 
 async def get_video_meta(url, retries=2):
-    """取得影片元數據，含 BrokenPipeError 重試機制"""
+    """取得影片元數據，含 BrokenPipeError 重試"""
     for attempt in range(retries + 1):
         result, err = run_with_retry(
             ["yt-dlp", "--dump-json", "--skip-download", url],
-            retries=0, timeout=30  # 外層已經有 retry loop
+            retries=0, timeout=30  # 外層已包 retry loop
         )
         if err:
             if attempt < retries:
@@ -203,6 +209,61 @@ async def get_video_meta(url, retries=2):
             return None, f"解析影片元數據失敗: {e}"
     return None, "無法取得影片資訊（重試耗盡）"
 
+
+def _build_subs_cmd(task_temp, url, lang_param=None):
+    """建構 yt-dlp 字幕下載指令"""
+    cmd = YTDLP_SUBS + [
+        "--sub-langs", lang_param or ",".join(SUBS_LANG_PRIORITY),
+        "--output", f"{task_temp}/%(id)s.%(ext)s", url
+    ]
+    return cmd
+
+
+def _find_subs(task_temp):
+    """在 task_temp 下遞迴搜尋所有已知字幕格式"""
+    files = []
+    for pattern in SUBS_FILE_GLOBS:
+        files.extend(glob.glob(os.path.join(task_temp, f"**/{pattern}"), recursive=True))
+    return files
+
+
+def _cleanup_path(path, is_dir=False):
+    """安全刪除檔案或目錄，不拋例外"""
+    if not path or not os.path.exists(path):
+        return
+    try:
+        (shutil.rmtree if is_dir else os.remove)(path)
+    except:
+        pass
+
+
+def _pick_best_subtitle(sub_files):
+    """依語言優先級選出最佳字幕檔"""
+    for lang in SUBS_LANG_PRIORITY:
+        for f_path in sub_files:
+            if lang in os.path.basename(f_path):
+                return f_path
+    return sub_files[0]
+
+
+SUBS_PARSERS = {
+    '.vtt': clean_vtt,
+    '.srt': clean_srt,
+    '.json': clean_json_sub,
+}
+
+
+def _parse_subtitle(file_path):
+    """依副檔名選擇對應解析器讀取字幕"""
+    fname = file_path.lower()
+    for ext, parser in SUBS_PARSERS.items():
+        if fname.endswith(ext):
+            return parser(file_path)
+    # 未知格式 — 當純文字讀取
+    with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+        return f.read()
+
+
 async def process_single_video(url, api_key, target_lang="中文"):
     meta_file = None
     task_temp = None
@@ -210,26 +271,16 @@ async def process_single_video(url, api_key, target_lang="中文"):
         meta, meta_err = await get_video_meta(url)
         if meta_err:
             return {"url": url, "error": meta_err}
-        
-        # 將 meta 寫入暫存檔供後續使用（保持向後相容）
+
+        task_temp = os.path.join(TEMP_DIR, os.urandom(4).hex())
+        os.makedirs(task_temp, exist_ok=True)
+
         meta_file = os.path.join(TEMP_DIR, f"meta_{os.urandom(4).hex()}.json")
         with open(meta_file, 'w', encoding='utf-8') as f:
             json.dump(meta, f, ensure_ascii=False)
 
-        # en 放最前面：多數影片是英文，避免自動翻譯語系觸發 429 而整批失敗
-        common_langs = ["en", "zh", "zh-TW", "zh-HK", "zh-CN", "zh-Hans", "zh-Hant", "ja", "ko"]
-        task_temp = os.path.join(TEMP_DIR, os.urandom(4).hex())
-        os.makedirs(task_temp, exist_ok=True)
-        
-        # 加上 --ignore-errors：單一語系 429 不影響其他語系的下載
-        subs_cmd = [
-            "yt-dlp", "--write-subs", "--write-auto-subs",
-            "--sub-langs", ",".join(common_langs),
-            "--skip-download", "--sub-format", "vtt/srt/json",
-            "--ignore-errors",
-            "--output", f"{task_temp}/%(id)s.%(ext)s", url
-        ]
-        result, subs_err = run_with_retry(subs_cmd, timeout=120)
+        # ── 字幕下載（含 --sub-langs all 重試）──
+        result, subs_err = run_with_retry(_build_subs_cmd(task_temp, url), timeout=120)
         if subs_err:
             print(f"[WARN] 字幕下載失敗: {url} — {subs_err}")
         elif result and result.returncode != 0:
@@ -239,52 +290,17 @@ async def process_single_video(url, api_key, target_lang="中文"):
             else:
                 print(f"[WARN] 字幕下載警告 (code {result.returncode}): {stderr[:300]}")
 
-        # 搜尋所有字幕格式
-        sub_exts = ['*.vtt', '*.srt', '*.json', '*.srv1', '*.srv2', '*.ttml']
-        sub_files = []
-        for ext in sub_exts:
-            sub_files.extend(glob.glob(os.path.join(task_temp, f"**/{ext}"), recursive=True))
-        
-        # 若找不到字幕，以 --sub-langs all 重試一次
+        sub_files = _find_subs(task_temp)
+
         if not sub_files:
             print(f"[RETRY] 使用 --sub-langs all 重試: {url}")
-            retry_cmd = [
-                "yt-dlp", "--write-subs", "--write-auto-subs",
-                "--sub-langs", "all",
-                "--skip-download", "--sub-format", "vtt/srt/json",
-                "--ignore-errors",
-                "--output", f"{task_temp}/%(id)s.%(ext)s", url
-            ]
-            run_with_retry(retry_cmd, timeout=120)
-            sub_files = []
-            for ext in sub_exts:
-                sub_files.extend(glob.glob(os.path.join(task_temp, f"**/{ext}"), recursive=True))
-        
+            run_with_retry(_build_subs_cmd(task_temp, url, lang_param="all"), timeout=120)
+            sub_files = _find_subs(task_temp)
+
         if not sub_files:
             return {"url": url, "error": "找不到可用字幕"}
 
-        # 依語言優先級選擇最佳字幕
-        best_sub_path = None
-        for lang in common_langs:
-            for f_path in sub_files:
-                if lang in os.path.basename(f_path):
-                    best_sub_path = f_path
-                    break
-            if best_sub_path: break
-        best_sub_path = best_sub_path or sub_files[0]
-        
-        # 根據格式選擇對應解析器
-        fname = best_sub_path.lower()
-        if fname.endswith('.vtt'):
-            text = clean_vtt(best_sub_path)
-        elif fname.endswith('.srt'):
-            text = clean_srt(best_sub_path)
-        elif fname.endswith('.json'):
-            text = clean_json_sub(best_sub_path)
-        else:
-            # 未知格式，嘗試當作純文字讀取
-            with open(best_sub_path, 'r', encoding='utf-8', errors='replace') as f:
-                text = f.read()
+        text = _parse_subtitle(_pick_best_subtitle(sub_files))
 
         article = await call_llm(text, meta, api_key, target_lang)
         save_history({
@@ -292,41 +308,56 @@ async def process_single_video(url, api_key, target_lang="中文"):
             "title": meta.get("title", "未知標題"),
             "thumbnail": get_best_thumbnail(meta),
             "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "article": article
+            "article": article,
         })
-
-        shutil.rmtree(task_temp)
-        if os.path.exists(meta_file): os.remove(meta_file)
         return {"url": url, "article": article, "title": meta.get("title", "未知標題")}
+
     except Exception as e:
         return {"url": url, "error": str(e)}
     finally:
-        if task_temp and os.path.exists(task_temp):
-            try:
-                shutil.rmtree(task_temp)
-            except:
-                pass
-        if meta_file and os.path.exists(meta_file):
-            try:
-                os.remove(meta_file)
-            except:
-                pass
+        _cleanup_path(task_temp, is_dir=True)
+        _cleanup_path(meta_file)
+
+
+# ══════════════════════════════════════════
+# HTTP 路由
+# ══════════════════════════════════════════
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    with open(os.path.join(BASE_DIR, "app", "templates", "index.html"), "r", encoding="utf-8") as f:
+        return f.read()
+
+
+@app.get("/history")
+async def get_history():
+    return load_history()
+
+
+@app.delete("/history")
+async def delete_history(url: str):
+    try:
+        delete_history_item(url)
+        return {"status": "success"}
+    except Exception as e:
+        return {"error": str(e)}
+
 
 @app.post("/convert")
 async def convert_videos(urls: str = Form(...), api_key: Optional[str] = Form(None), target_lang: Optional[str] = Form("中文")):
     url_list = [u.strip() for u in urls.split('\n') if u.strip()]
-    if not url_list: return {"error": "請輸入至少一個有效的 YouTube 連結"}
-    
-    # 優先使用前端傳入的 API Key，若無則嘗試使用環境變量
+    if not url_list:
+        return {"error": "請輸入至少一個有效的 YouTube 連結"}
+
     effective_api_key = api_key or get_api_key()
     if not effective_api_key or effective_api_key == "YOUR_GEMINI_API_KEY_HERE":
         return {"error": "請提供有效的 Gemini API Key"}
-    
+
     youtube_regex = r'^(https?://)?(www\.)?(youtube\.com|youtu\.be)/.+'
     valid_urls = [u for u in url_list if re.match(youtube_regex, u)]
-    if not valid_urls: return {"error": "所有輸入的連結格式均不正確"}
-    
-    # 建立任務，並將 API Key 與目標語系傳遞給 process_single_video
+    if not valid_urls:
+        return {"error": "所有輸入的連結格式均不正確"}
+
     tasks = [process_single_video(url, effective_api_key, target_lang) for url in valid_urls]
     results = await asyncio.gather(*tasks)
     return {"results": results}
