@@ -80,7 +80,7 @@ youtube-article-tool/
 有兩種使用本工具的方式，根據用戶的情境選擇：
 
 ##### A1. 網頁工具 (主要入口)
-用戶想要使用完整的 Web UI（含歷史、多結果分頁、i18n 等）。路徑：`/Users/lunker/youtube-article-tool`
+用戶想要使用完整的 Web UI（含歷史、多結果分頁、i18n 等）。路徑：`/Users/lunker/Developer/Projects/youtube-article-tool`
 啟動：執行 `start.sh`（內部呼叫 `uvicorn app.main:app --reload --port 8080`）
 網址：`http://127.0.0.1:8080`
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 # 進入項目目錄
-cd /Users/lunker/youtube-article-tool
+cd "$(dirname "$0")"
 
 # 安裝依賴
 pip install -r requirements.txt

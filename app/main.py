@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request, Form
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 import subprocess
 import re
@@ -13,9 +14,16 @@ from datetime import datetime
 from typing import Optional
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ── 目錄 ──
-BASE_DIR = "/Users/lunker/youtube-article-tool"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMP_DIR = os.path.join(BASE_DIR, "temp")
 HISTORY_FILE = os.path.join(BASE_DIR, "data", "history.json")
 os.makedirs(TEMP_DIR, exist_ok=True)
@@ -32,7 +40,7 @@ YTDLP_SUBS = YTDLP_BASE + ["--write-subs", "--write-auto-subs", "--sub-format", 
 
 
 def get_api_key():
-    return os.getenv("GEMINI_API_KEY", "YOUR_GEMINI_API_KEY_HERE")
+    return os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY", "")
 
 
 # ══════════════════════════════════════════
@@ -92,7 +100,7 @@ def load_history():
         try:
             with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except:
+        except (json.JSONDecodeError, IOError):
             return []
     return []
 
@@ -157,7 +165,7 @@ async def call_llm(text, meta, api_key, target_lang="中文"):
         res_json = response.json()
         try:
             return res_json['candidates'][0]['content']['parts'][0]['text']
-        except:
+        except (KeyError, IndexError, json.JSONDecodeError):
             return f"AI 生成失敗: {json.dumps(res_json)}"
 
 
@@ -233,7 +241,7 @@ def _cleanup_path(path, is_dir=False):
         return
     try:
         (shutil.rmtree if is_dir else os.remove)(path)
-    except:
+    except (OSError, PermissionError):
         pass
 
 
@@ -351,7 +359,7 @@ async def convert_videos(urls: str = Form(...), api_key: Optional[str] = Form(No
 
     effective_api_key = api_key or get_api_key()
     if not effective_api_key or effective_api_key == "YOUR_GEMINI_API_KEY_HERE":
-        return {"error": "請提供有效的 Gemini API Key"}
+        return {"error": "請提供有效的 Gemini API Key（可從環境變數 GEMINI_API_KEY 或前端表單輸入）"}
 
     youtube_regex = r'^(https?://)?(www\.)?(youtube\.com|youtu\.be)/.+'
     valid_urls = [u for u in url_list if re.match(youtube_regex, u)]

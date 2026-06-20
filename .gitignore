@@ -6,3 +6,4 @@ data/
 docs/en.md
 docs/jp.md
 docs/zh-TW.md
+.env*

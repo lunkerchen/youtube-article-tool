@@ -711,42 +711,6 @@
         }
 
         // ====================================================================
-        //  下載（多格式）
-        // ====================================================================
-        function downloadMarkdown() {
-            if (!currentArticle || !currentTitle) return;
-            const format = document.getElementById('formatSelect').value;
-            const safeName = currentTitle.replace(/[/\\?%*:|"<>]/g, '-').trim();
-
-            let content = currentArticle;
-            let mimeType = 'text/markdown; charset=utf-8';
-            let ext = 'md';
-
-            if (format === 'html') {
-                content = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${safeName}</title><style>body{font-family:-apple-system,system-ui,sans-serif;max-width:720px;margin:40px auto;padding:0 20px;line-height:1.7;color:#333}h1{font-size:2rem}h2{font-size:1.5rem;margin-top:2rem}code{background:#f0f0f0;padding:2px 6px;border-radius:4px}blockquote{border-left:4px solid #ddd;margin:0;padding:0 20px;color:#666}</style></head><body>${marked.parse(currentArticle)}</body></html>`;
-                mimeType = 'text/html; charset=utf-8';
-                ext = 'html';
-            } else if (format === 'txt') {
-                // Strip markdown to plain text
-                const tmp = document.createElement('div');
-                tmp.innerHTML = marked.parse(currentArticle);
-                content = tmp.textContent || tmp.innerText || '';
-                mimeType = 'text/plain; charset=utf-8';
-                ext = 'txt';
-            }
-
-            const blob = new Blob([content], { type: mimeType });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = safeName + '.' + ext;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        // ====================================================================
         //  歷史時間分組
         // ====================================================================
         function groupHistoryByTime(items) {
