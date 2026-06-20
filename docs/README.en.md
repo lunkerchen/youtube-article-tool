@@ -73,6 +73,17 @@ The conversion process is straightforward — 4 steps:
 
 ## 📝 Patch Notes
 
+### v3.6 (2026-06-20) — Portability, Tests & MCP
+
+**🔧 Improvements**
+- **Portable paths**: Replaced all hardcoded `/Users/lunker/...` paths with `os.path.dirname` — clone anywhere, works everywhere.
+- **49 unit tests**: Comprehensive test coverage for subtitle cleaning (VTT/SRT/JSON), history CRUD, retry logic, thumbnail fallback, subtitle picking.
+- **MCP Server**: `mcp_server.py` exposes conversion tools via MCP protocol for Hermes Agent / Claude Desktop integration.
+- **Docker support**: `Dockerfile` for one-command containerized deployment.
+- **CORS middleware**: Added for local development.
+- **Google API key fallback**: `get_api_key()` now checks `GOOGLE_API_KEY` env var as fallback.
+- **LICENSE**: MIT license file added.
+
 ### v3.5 (2026-05-02) — Complete UI/UX overhaul
 
 **🎨 UI/UX**
@@ -154,6 +165,43 @@ The conversion process is straightforward — 4 steps:
 
 ---
 
+## 🤖 MCP Server
+
+This tool can run as an MCP (Model Context Protocol) server, exposing conversion tools to AI agents like Hermes and Claude Desktop.
+
+```bash
+# stdio mode (for Hermes/Claude Desktop)
+python mcp_server.py
+
+# HTTP mode (for cloud deployment)
+python mcp_server.py --http --port 8523
+
+# Or via ASGI
+uvicorn mcp_server:app --host 0.0.0.0 --port 8523
+```
+
+**API Key Authentication (HTTP mode):**
+Set `MCP_API_KEYS=sk-a1b2c3,sk-d4e5f6` to manage multiple keys. Clients must include `Authorization: Bearer <key>` header.
+
+---
+
+## 🐳 Docker
+
+```bash
+docker build -t youtube-article-tool .
+docker run -p 8080:8080 -e GEMINI_API_KEY=your-key youtube-article-tool
+```
+
+---
+
+## 🧪 Running Tests
+
+```bash
+pytest tests/ -v
+```
+
+---
+
 ## 📄 File Structure
 
 ```
@@ -171,7 +219,12 @@ youtube-article-tool/
 │   └── README.ja.md         # Japanese documentation
 ├── start.sh                 # Quick server startup script
 ├── PATCH_NOTES.md           # Detailed version history
-└── README.md                # Root project overview (links to language-specific docs)
+├── README.md                # Root project overview (links to language-specific docs)
+├── tests/
+│   └── test_main.py          # 49 unit tests
+├── mcp_server.py             # MCP server for AI agents
+├── Dockerfile
+└── LICENSE                   # MIT
 ```
 
 ---

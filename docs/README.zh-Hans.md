@@ -108,6 +108,17 @@ http://127.0.0.1:8080
 
 ## 📝 更新日志
 
+### v3.6 (2026-06-20) — 可移植、测试与 MCP
+
+**🔧 改进**
+- **可移植路径**：将所有硬编码的绝对路径 (`/Users/lunker/...`) 替换为 `os.path.dirname`，clone 到任何位置都能正常工作。
+- **49 个单元测试**：完整覆盖字幕清洗 (VTT/SRT/JSON)、历史记录 CRUD、重试逻辑、缩图回退、字幕语言选择。
+- **MCP 服务器**：`mcp_server.py` 通过 MCP 协议暴露转换工具，支持 Hermes Agent / Claude Desktop 集成。
+- **Docker 支持**：`Dockerfile` 一键容器化部署。
+- **CORS 中间件**：本地开发便利性提升。
+- **Google API Key 备援**：`get_api_key()` 现支持 `GOOGLE_API_KEY` 环境变量作为备援。
+- **LICENSE**：新增 MIT 授权条款。
+
 ### v3.5 (2026-05-02) — 全面 UI/UX 改版
 
 **🎨 UI/UX**
@@ -198,6 +209,43 @@ http://127.0.0.1:8080
 
 ---
 
+## 🤖 MCP 服务器
+
+本工具可作为 MCP (Model Context Protocol) 服务器运行，将转换工具暴露给 Hermes Agent、Claude Desktop 等 AI 助手。
+
+```bash
+# stdio 模式 (Hermes/Claude Desktop)
+python mcp_server.py
+
+# HTTP 模式 (云端部署)
+python mcp_server.py --http --port 8523
+
+# 或通过 ASGI
+uvicorn mcp_server:app --host 0.0.0.0 --port 8523
+```
+
+**API Key 验证 (HTTP 模式)：**
+设置 `MCP_API_KEYS=sk-a1b2c3,sk-d4e5f6` 管理多把密钥。客户端需带 `Authorization: Bearer <key>` 头部。
+
+---
+
+## 🐳 Docker
+
+```bash
+docker build -t youtube-article-tool .
+docker run -p 8080:8080 -e GEMINI_API_KEY=your-key youtube-article-tool
+```
+
+---
+
+## 🧪 运行测试
+
+```bash
+pytest tests/ -v
+```
+
+---
+
 ## 📄 文件结构
 
 ```
@@ -220,6 +268,11 @@ youtube-article-tool/
 │   ├── README.zh-Hant.md    # 繁体中文文档
 │   ├── README.en.md         # 英文文档
 │   └── README.ja.md         # 日文文档
+├── tests/
+│   └── test_main.py          # 49 个单元测试
+├── mcp_server.py             # MCP 服务器 (AI Agent 整合)
+├── Dockerfile
+├── LICENSE                   # MIT
 ├── start.sh                 # 快速启动脚本
 ├── PATCH_NOTES.md           # 完整版本更新记录
 └── requirements.txt         # Python 依赖清单

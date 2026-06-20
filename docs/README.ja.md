@@ -117,6 +117,17 @@ http://127.0.0.1:8080
 
 ## 📝 パッチノート
 
+### v3.6 (2026-06-20) — ポータビリティ、テスト & MCP
+
+**🔧 改善**
+- **ポータブルパス**: ハードコードされた絶対パス (`/Users/lunker/...`) を `os.path.dirname` に置換 — どこにクローンしても動作。
+- **49 のユニットテスト**: 字幕クリーニング (VTT/SRT/JSON)、履歴 CRUD、リトライロジック、サムネイルフォールバック、字幕言語選択を網羅。
+- **MCP サーバー**: `mcp_server.py` が MCP プロトコル経由で変換ツールを公開、Hermes Agent / Claude Desktop 連携対応。
+- **Docker サポート**: `Dockerfile` でワンコマンドコンテナデプロイ。
+- **CORS ミドルウェア**: ローカル開発の利便性向上。
+- **Google API キーフォールバック**: `get_api_key()` が `GOOGLE_API_KEY` 環境変数をフォールバックとして確認。
+- **LICENSE**: MIT ライセンスファイル追加。
+
 ### v3.5 (2026-05-02) — UI/UX 完全リニューアル
 
 **🎨 UI/UX**
@@ -217,6 +228,39 @@ http://127.0.0.1:8080
 
 ---
 
+## 🤖 MCP サーバー
+
+このツールは MCP (Model Context Protocol) サーバーとして動作し、Hermes Agent、Claude Desktop などの AI アシスタントに変換ツールを公開します。
+
+```bash
+# stdio モード (Hermes/Claude Desktop)
+python mcp_server.py
+
+# HTTP モード (クラウドデプロイ)
+python mcp_server.py --http --port 8523
+
+# または ASGI 経由
+uvicorn mcp_server:app --host 0.0.0.0 --port 8523
+```
+
+**API キー認証 (HTTP モード)：**
+`MCP_API_KEYS=sk-a1b2c3,sk-d4e5f6` を設定して複数キーを管理。クライアントは `Authorization: Bearer <key>` ヘッダーを含める必要があります。
+
+## 🐳 Docker
+
+```bash
+docker build -t youtube-article-tool .
+docker run -p 8080:8080 -e GEMINI_API_KEY=your-key youtube-article-tool
+```
+
+## 🧪 テスト実行
+
+```bash
+pytest tests/ -v
+```
+
+---
+
 ## 📄 ファイル構造
 
 ```
@@ -240,6 +284,11 @@ youtube-article-tool/
 │   ├── README.zh-Hans.md    # 簡体字中国語ドキュメント
 │   ├── README.ja.md         # 日本語ドキュメント（本ファイル）
 │   └── zh-TW.md             # 繁体字中国語の追加資料
+├── tests/
+│   └── test_main.py          # 49 のユニットテスト
+├── mcp_server.py             # MCP サーバー (AI Agent 連携)
+├── Dockerfile
+├── LICENSE                   # MIT
 ├── start.sh                 # クイック起動スクリプト
 ├── PATCH_NOTES.md           # 完全なバージョン更新履歴
 └── requirements.txt         # Python依存関係リスト

@@ -21,8 +21,21 @@ AI-powered tool that transforms YouTube videos into deeply structured articles v
 | Output | Markdown — view, copy, or download in-browser |
 | History | Last 50 conversions persisted locally, with delete support |
 | UI | 4 languages (TW, CN, EN, JA), auto-detect browser lang, 2 themes (dark/high-contrast), skeleton loading, unified toasts, tab keyboard nav, sticky header, time-grouped history, a11y-optimized |
+| MCP Server | Expose as MCP tool for Hermes/Claude Desktop via `mcp_server.py` |
+| Docker | One-command deploy via `Dockerfile` |
+| Tests | 49 unit tests covering subtitle cleaning, history, retry logic |
 
 ## What's New
+
+**v3.6 (2026-06-20) — Portability, Tests & MCP**
+
+- **Portable paths**: All hardcoded absolute paths replaced with `os.path.dirname` — clone anywhere, works everywhere.
+- **49 unit tests**: Subtitle cleaning (VTT/SRT/JSON), history CRUD, retry logic, thumbnail fallback, subtitle picking.
+- **MCP Server**: `mcp_server.py` exposes tools via MCP protocol for Hermes Agent / Claude Desktop integration.
+- **Docker support**: `Dockerfile` for one-command containerized deployment.
+- **CORS middleware**: Added for local development convenience.
+- **LICENSE**: MIT license added.
+- **Google API key fallback**: `get_api_key()` now checks `GOOGLE_API_KEY` env var as fallback.
 
 **v3.5 (2026-05-02) — Complete UI/UX overhaul**
 
@@ -73,10 +86,59 @@ AI-powered tool that transforms YouTube videos into deeply structured articles v
 ```bash
 git clone https://github.com/lunkerchen/youtube-article-tool.git
 cd youtube-article-tool
-pip install yt-dlp fastapi uvicorn httpx python-multipart
+pip install -r requirements.txt
 export GEMINI_API_KEY="your-key-here"
 bash start.sh
 # Open http://127.0.0.1:8080
+```
+
+### MCP Server (for Hermes/Claude Desktop)
+
+```bash
+python mcp_server.py          # stdio mode
+python mcp_server.py --http   # HTTP mode
+```
+
+### Docker
+
+```bash
+docker build -t youtube-article-tool .
+docker run -p 8080:8080 -e GEMINI_API_KEY=your-key youtube-article-tool
+```
+
+### Tests
+
+```bash
+pytest tests/ -v
+```
+
+## File Structure
+
+```
+youtube-article-tool/
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   └── templates/
+│       └── index.html
+├── tests/
+│   └── test_main.py          # 49 unit tests
+├── data/
+│   └── history.json
+├── docs/
+│   ├── README.en.md
+│   ├── README.zh-Hant.md
+│   ├── README.zh-Hans.md
+│   └── README.ja.md
+├── scripts/
+│   └── export-obsidian.py
+├── mcp_server.py             # MCP server for AI agents
+├── Dockerfile
+├── LICENSE                   # MIT
+├── start.sh
+├── requirements.txt
+├── PATCH_NOTES.md
+└── README.md
 ```
 
 ---

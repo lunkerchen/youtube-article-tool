@@ -1,5 +1,19 @@
 # 📝 Patch Notes
 
+## v3.6 (2026-06-20) — Portability, Tests & MCP
+
+### 🔧 Improvements
+- **Portable paths**: Replaced all hardcoded `/Users/lunker/...` paths with `os.path.dirname` — clone anywhere, works everywhere.
+- **49 unit tests**: Comprehensive test coverage for subtitle cleaning (VTT/SRT/JSON), history CRUD, retry logic, thumbnail fallback, subtitle picking.
+- **MCP Server**: `mcp_server.py` exposes conversion tools via MCP protocol for Hermes Agent / Claude Desktop integration.
+- **Docker support**: `Dockerfile` for one-command containerized deployment.
+- **CORS middleware**: Added for local development.
+- **Google API key fallback**: `get_api_key()` now checks `GOOGLE_API_KEY` env var as fallback.
+- **LICENSE**: MIT license file added.
+- **Code quality**: Bare except clauses replaced with specific types, duplicate `downloadMarkdown` removed.
+
+---
+
 ## v3.5 (2026-05-02) — Complete UI/UX overhaul
 
 ### 🎨 UI/UX
